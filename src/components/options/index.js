@@ -1,3 +1,5 @@
+//TODO: Manage to edit a simple user ("index.js:2178 Warning: Missing translation for key: "params cannot be empty"")
+
 import {
   Edit,
   List,
@@ -25,17 +27,22 @@ import {
 } from 'react-admin';
 import React from 'react';
 
-export const CategoryFilter = props => (
+export const OptionFilter = props => (
   <Filter {...props}>
     <TextInput label="Search by name" source="name_contains" alwaysOn />
   </Filter>
 );
 
-export const CategoryList = props => (
-  <List filters={<CategoryFilter />} {...props}>
+export const OptionList = props => (
+  <List filters={<OptionFilter />} {...props}>
     <Datagrid>
       <TextField source="id" />
       <TextField source="name" />
+      <ReferenceManyField label="Option values" target="option.id" reference="OptionValue">
+        <SingleFieldList>
+          <ChipField source="name" />
+        </SingleFieldList>
+      </ReferenceManyField>
       <ReferenceField source="shop.id" reference="Shop">
         <TextField source="name" />
       </ReferenceField>
@@ -45,29 +52,37 @@ export const CategoryList = props => (
   </List>
 );
 
-export const CategoryEdit = props => (
-  <Edit title="Edit a category" {...props}>
+export const OptionEdit = props => (
+  <Edit title="Edit an option" {...props}>
     <SimpleForm>
       <DisabledInput source="id" />
       <TextInput source="name" />
+      <ReferenceArrayInput source="values" reference="OptionValue" perPage={200}>
+        <SelectArrayInput optionText="name" />
+      </ReferenceArrayInput>
     </SimpleForm>
   </Edit>
 );
 
-export const CategoryShow = props => (
-  <Show title="Show a category" {...props}>
+export const OptionShow = props => (
+  <Show title="Show an option" {...props}>
     <SimpleShowLayout>
       <TextField source="id" />
       <TextField source="name" />
       <ReferenceField source="shop.id" reference="Shop">
         <TextField source="name" />
       </ReferenceField>
+      <ReferenceManyField label="Option values" target="option.id" reference="OptionValue">
+        <SingleFieldList>
+          <ChipField source="name" />
+        </SingleFieldList>
+      </ReferenceManyField>
     </SimpleShowLayout>
   </Show>
 );
 
-export const CategoryCreate = props => (
-  <Create title="Create a category" {...props}>
+export const OptionCreate = props => (
+  <Create title="Create an option" {...props}>
     <SimpleForm>
       <DisabledInput source="id" />
       <TextInput source="name" />

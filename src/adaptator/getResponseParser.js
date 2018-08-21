@@ -3,7 +3,7 @@ import { GET_LIST, GET_MANY, GET_MANY_REFERENCE } from 'react-admin';
 import getFinalType from './getFinalType';
 
 const sanitizeResource = (introspectionResults, resource) => data => {
-  const result = Object.keys(data).reduce((acc, key) => {
+  return Object.keys(data).reduce((acc, key) => {
     if (key.startsWith('_')) {
       return acc;
     }
@@ -15,11 +15,8 @@ const sanitizeResource = (introspectionResults, resource) => data => {
       return { ...acc, [field.name]: data[field.name] };
     }
 
-    // FIXME: We might have to handle linked types which are not resources but will have to be careful about
-    // endless circular dependencies
-    const linkedResource = introspectionResults.resources.find(
-      r => r.type.name === type.name
-    );
+    // FIXME: We might have to handle linked types which are not resources but will have to be careful about endless circular dependencies
+    const linkedResource = introspectionResults.resources.find(r => r.type.name === type.name);
 
     if (linkedResource) {
       const linkedResourceData = data[field.name];
@@ -30,27 +27,21 @@ const sanitizeResource = (introspectionResults, resource) => data => {
           [field.name]: data[field.name].map(
             sanitizeResource(introspectionResults, linkedResource)
           ),
-          [`${field.name}Ids`]: data[field.name].map(d => d.id),
+          [`${field.name}Ids`]: data[field.name].map(d => d.id)
         };
       }
 
       return {
         ...acc,
-        [`${field.name}.id`]: linkedResourceData
-          ? data[field.name].id
-          : undefined,
+        [`${field.name}.id`]: linkedResourceData ? data[field.name].id : undefined,
         [field.name]: linkedResourceData
-          ? sanitizeResource(introspectionResults, linkedResource)(
-            data[field.name]
-          )
-          : undefined,
+          ? sanitizeResource(introspectionResults, linkedResource)(data[field.name])
+          : undefined
       };
     }
 
     return { ...acc, [field.name]: data[field.name] };
   }, {});
-
-  return result;
 };
 
 export default introspectionResults => (aorFetchType, resource) => response => {
@@ -62,9 +53,10 @@ export default introspectionResults => (aorFetchType, resource) => response => {
     aorFetchType === GET_MANY ||
     aorFetchType === GET_MANY_REFERENCE
   ) {
+    console.log(aorFetchType, response.data.items.map(sanitize));
     return {
       data: response.data.items.map(sanitize),
-      total: response.data.total.aggregate.count,
+      total: response.data.total.aggregate.count
     };
   }
 
