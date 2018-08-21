@@ -1,0 +1,31 @@
+{
+  "name": "react-admin-prisma",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "apollo-client": "^2.3.8",
+    "apollo-client-preset": "^1.0.8",
+    "graphql-tag": "^2.6.1",
+    "lodash": "~4.17.5",
+    "pluralize": "~7.0.0",
+    "ra-data-graphql": "^2.0.3",
+    "react": "^16.4.1",
+    "react-admin": "^2.0.3",
+    "react-dom": "^16.4.1",
+    "react-scripts": "1.1.4"
+  },
+  "peerDependencies": {
+    "graphql": "^0.13.2",
+    "react-admin": "^2.0.3"
+  },
+  "devDependencies": {
+    "graphql": "^0.13.2",
+    "react-admin": "^2.0.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
