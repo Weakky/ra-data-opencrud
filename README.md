@@ -6,7 +6,7 @@ WIP adaptators:</br>
 https://github.com/Weakky/ra-data-prisma/</br>
 https://github.com/moritzmorgenroth/ra-data-prisma
 
-## This adaptator is currently being developed. Below is a quick explanation of the challenges that'll be faced.
+## This adaptator is currently under active development. Below is a quick explanation of the challenges that'll be faced.
 
 # Summary
 
