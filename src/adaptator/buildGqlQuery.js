@@ -2,10 +2,10 @@ import { GET_LIST, GET_MANY, GET_MANY_REFERENCE, DELETE } from 'react-admin';
 import { QUERY_TYPES } from 'ra-data-graphql';
 import { TypeKind } from 'graphql';
 
-import { encodeQuery, encodeMutation } from './graphqlify';
-import getFinalType from './getFinalType';
-import isList from './isList';
-import isRequired from './isRequired';
+import { encodeQuery, encodeMutation } from './utils/graphqlify';
+import getFinalType from './utils/getFinalType';
+import isList from './utils/isList';
+import isRequired from './utils/isRequired';
 
 export const buildFields = introspectionResults => fields => {
   return fields.reduce((acc, field) => {

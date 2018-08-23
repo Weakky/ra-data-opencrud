@@ -34,6 +34,7 @@ const defaultOptions = {
   }
 };
 
+//TODO: Prisma supports batching (UPDATE_MANY, DELETE_MANY)
 export default options => {
   return buildDataProvider(merge({}, defaultOptions, options)).then(defaultDataProvider => {
     return (fetchType, resource, params) => {

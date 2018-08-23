@@ -1,6 +1,6 @@
 import { TypeKind } from 'graphql';
 import { GET_LIST, GET_MANY, GET_MANY_REFERENCE } from 'react-admin';
-import getFinalType from './getFinalType';
+import getFinalType from './utils/getFinalType';
 
 const sanitizeResource = (introspectionResults, resource) => data => {
   return Object.keys(data).reduce((acc, key) => {

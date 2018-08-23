@@ -1,7 +1,7 @@
-import gql from "graphql-tag";
-import buildVariables from "./buildVariables";
-import buildGqlQuery from "./buildGqlQuery";
-import getResponseParser from "./getResponseParser";
+import gql from 'graphql-tag';
+import buildVariables from './buildVariables';
+import buildGqlQuery from './buildGqlQuery';
+import getResponseParser from './getResponseParser';
 
 export const buildQueryFactory = (
   buildVariablesImpl,
@@ -11,14 +11,12 @@ export const buildQueryFactory = (
   const knownResources = introspectionResults.resources.map(r => r.type.name);
 
   return (aorFetchType, resourceName, params) => {
-    const resource = introspectionResults.resources.find(
-      r => r.type.name === resourceName
-    );
+    const resource = introspectionResults.resources.find(r => r.type.name === resourceName);
 
     if (!resource) {
       throw new Error(
         `Unknown resource ${resourceName}. Make sure it has been declared on your server side schema. Known resources are ${knownResources.join(
-          ", "
+          ', '
         )}`
       );
     }
