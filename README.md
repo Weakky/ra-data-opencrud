@@ -2,8 +2,7 @@
 
 *Prisma on steroids with react-admin*: build backoffices with prisma plugged on react-admin!
 
-WIP adaptators:</br>
-https://github.com/Weakky/ra-data-prisma/</br>
+Other WIP adaptators:</br>
 https://github.com/moritzmorgenroth/ra-data-prisma
 
 ## This adaptator is currently under active development. Below is a quick explanation of the challenges that'll be faced.
