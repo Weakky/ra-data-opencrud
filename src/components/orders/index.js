@@ -15,12 +15,20 @@ import {
   TextInput,
   NumberField,
   FunctionField,
-  BooleanField
-} from "react-admin";
+  BooleanField, Filter, ReferenceInput, SelectInput
+} from 'react-admin';
 import React from "react";
 
+export const OrderFilter = props => (
+  <Filter {...props}>
+    <ReferenceInput label="Shop" source="receiver.id" reference="Shop" alwaysOn>
+      <SelectInput optionText="name"/>
+    </ReferenceInput>
+  </Filter>
+);
+
 export const OrderList = props => (
-  <List {...props}>
+  <List filters={<OrderFilter />} {...props}>
     <Datagrid>
       <ReferenceField label="Buyer" source="owner.id" reference="User">
         <TextField source="firstName" />

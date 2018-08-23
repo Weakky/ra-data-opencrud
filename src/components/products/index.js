@@ -29,8 +29,11 @@ import React from 'react'
 export const ProductFilter = props => (
   <Filter {...props}>
     <TextInput label="Search by name" source="name_contains" alwaysOn />
+    <ReferenceInput label="Shop" source="shop.id" reference="Shop" alwaysOn>
+      <SelectInput optionText="name"/>
+    </ReferenceInput>
   </Filter>
-)
+);
 
 export const ProductList = props => (
   <List filters={<ProductFilter />} {...props}>

@@ -56,7 +56,7 @@ class App extends Component {
     }
 
     return (
-      <Admin dataProvider={dataProvider}>
+      <Admin title="Prisma e-commerce" dataProvider={dataProvider}>
         <Resource name="Product" list={ProductList} edit={ProductEdit} />
         <Resource name="Order" list={OrderList} />
         <Resource

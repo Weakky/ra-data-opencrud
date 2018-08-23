@@ -25,28 +25,31 @@ import {
   SelectInput,
   SimpleShowLayout,
   DisabledField
-} from "react-admin";
-import React from 'react'
+} from 'react-admin';
+import React from 'react';
 
 export const AttributeFilter = props => (
   <Filter {...props}>
     <TextInput label="Search by name" source="name_contains" alwaysOn />
+    <ReferenceInput label="Shop" source="shop.id" reference="Shop" alwaysOn>
+      <SelectInput optionText="name" />
+    </ReferenceInput>
   </Filter>
-)
+);
 
 export const AttributeList = props => (
   <List filters={<AttributeFilter />} {...props}>
     <Datagrid>
-      <TextField source="id"/>
-      <TextField source="value"/>
+      <TextField source="id" />
+      <TextField source="value" />
       <ReferenceField source="category.id" reference="Category">
-        <TextField source="name"/>
+        <TextField source="name" />
       </ReferenceField>
       <ReferenceField source="shop.id" reference="Shop">
-        <TextField source="name"/>
+        <TextField source="name" />
       </ReferenceField>
-      <EditButton/>
-      <ShowButton/>
+      <EditButton />
+      <ShowButton />
     </Datagrid>
   </List>
 );
@@ -57,10 +60,10 @@ export const AttributeEdit = props => (
       <DisabledInput source="id" />
       <TextInput source="value" />
       <ReferenceInput source="category.id" reference="Category">
-        <SelectInput optionText="name"/>
+        <SelectInput optionText="name" />
       </ReferenceInput>
       <ReferenceInput source="shop.id" reference="Shop">
-        <SelectInput optionText="name"/>
+        <SelectInput optionText="name" />
       </ReferenceInput>
     </SimpleForm>
   </Edit>
@@ -69,13 +72,13 @@ export const AttributeEdit = props => (
 export const AttributeShow = props => (
   <Show title="Show a attribute" {...props}>
     <SimpleShowLayout>
-      <TextField source="id"/>
-      <TextField source="value"/>
+      <TextField source="id" />
+      <TextField source="value" />
       <ReferenceField source="category.id" reference="Category">
-        <TextField source="name"/>
+        <TextField source="name" />
       </ReferenceField>
       <ReferenceField source="shop.id" reference="Shop">
-        <TextField source="name"/>
+        <TextField source="name" />
       </ReferenceField>
     </SimpleShowLayout>
   </Show>
@@ -87,10 +90,10 @@ export const AttributeCreate = props => (
       <DisabledInput source="id" />
       <TextInput source="value" />
       <ReferenceInput source="category.id" reference="Category">
-        <SelectInput optionText="name"/>
+        <SelectInput optionText="name" />
       </ReferenceInput>
       <ReferenceInput source="shop.id" reference="Shop">
-        <SelectInput optionText="name"/>
+        <SelectInput optionText="name" />
       </ReferenceInput>
     </SimpleForm>
   </Create>
