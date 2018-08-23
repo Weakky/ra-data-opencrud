@@ -1,4 +1,4 @@
-import graphqlify, { encodeQuery, encodeMutation } from './';
+import graphqlify, { encodeQuery, encodeMutation } from './index';
 
 describe('graphqlify', function() {
     it('should encode a simple field', function() {
