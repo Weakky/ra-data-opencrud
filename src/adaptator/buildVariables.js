@@ -9,13 +9,16 @@ import {
 } from 'react-admin';
 import getFinalType from './getFinalType';
 
+import difference from 'lodash/difference';
+import isObject from 'lodash/isObject';
+
 const buildGetListVariables = introspectionResults => (resource, aorFetchType, params) => {
   const filter = Object.keys(params.filter).reduce((acc, key) => {
     if (key === 'ids') {
       return { ...acc, id_in: params.filter[key] };
     }
 
-    if (typeof params.filter[key] === 'object') {
+    if (isObject(params.filter[key])) {
       const type = introspectionResults.types.find(
         t => t.name === `${resource.type.name}WhereInput`
       );
@@ -72,99 +75,109 @@ const buildGetListVariables = introspectionResults => (resource, aorFetchType, p
   };
 };
 
-const findFinalType = (introspectionResults, typeName, field) => {
+const findInputFieldForType = (introspectionResults, typeName, field) => {
   const type = introspectionResults.types.find(t => t.name === typeName);
 
-  return getFinalType(type.inputFields.find(t => t.name === field));
+  if (!type) {
+    return null;
+  }
+
+  const inputFieldType = type.inputFields.find(t => t.name === field);
+
+  return !!inputFieldType ? getFinalType(inputFieldType.type) : null;
 };
 
-//Duplicated connectFields and updateFields method because of WIP
-//one will eventually compute fields to disconnect/connect (when aorFetchType == UPDATE)
-//other one will connect/create (when aorFetchType == CREATE)
-const updateFields = (inputArg, introspectionResults, typeName, field) => {
-  const inputType = findFinalType(introspectionResults, typeName, field);
-  const connectInputType = findFinalType(introspectionResults, inputType.type.name, 'connect');
+const inputFieldExistForType = (introspectionResults, typeName, field) => {
+  return !!findInputFieldForType(introspectionResults, typeName, field);
+};
 
-  return Object.keys(inputArg).reduce(
-    (acc, key) => {
-      const foundInputType = findFinalType(introspectionResults, connectInputType.type.name, key);
-
-      if (!!foundInputType) {
-        return {
-          ...acc,
-          connect: {
-            ...acc.connect,
-            [key]: inputArg[key]
-          }
-        };
-      }
-
-      return acc;
-    },
-    {
-      connect: {}
-    }
+const buildReferenceField = (inputArg, introspectionResults, typeName, field, mutationType) => {
+  const inputType = findInputFieldForType(introspectionResults, typeName, field);
+  const mutationInputType = findInputFieldForType(
+    introspectionResults,
+    inputType.name,
+    mutationType
   );
+
+  return Object.keys(inputArg).reduce((acc, key) => {
+    return inputFieldExistForType(introspectionResults, mutationInputType.name, key)
+      ? { ...acc, [key]: inputArg[key] }
+      : acc;
+  }, {});
 };
 
-const connectFields = (inputArg, introspectionResults, typeName, field) => {
-  const inputType = findFinalType(introspectionResults, typeName, field);
-  const connectInputType = findFinalType(introspectionResults, inputType.type.name, 'connect');
-
-  return Object.keys(inputArg).reduce(
-    (acc, key) => {
-      const foundInputType = findFinalType(introspectionResults, connectInputType.type.name, key);
-
-      if (!!foundInputType) {
-        return {
-          ...acc,
-          connect: {
-            ...acc.connect,
-            [key]: inputArg[key]
-          }
-        };
-      }
-
-      return acc;
-    },
-    {
-      connect: {}
-    }
-  );
+const computeFieldsToAdd = (oldIds, newIds) => {
+  return difference(newIds, oldIds).map(id => ({ id }));
 };
 
-const buildUpdateVariables = introspectionResults => (resource, aorFetchType, params, queryType) =>
-  Object.keys(params.data).reduce((acc, key) => {
+const computeFieldsToRemove = (oldIds, newIds) => {
+  return difference(oldIds, newIds).map(id => ({ id }));
+};
+
+//TODO: Compute fields to update
+const computeFieldsToUpdate = (oldIds, newIds) => {
+  return [];
+};
+
+const buildUpdateVariables = introspectionResults => (resource, aorFetchType, params) => {
+  return Object.keys(params.data).reduce((acc, key) => {
     if (!params.data[key]) {
       return acc;
     }
 
     if (Array.isArray(params.data[key])) {
-      // const arg = queryType.args.find(a => a.name === `${key}Ids`);
-      //
-      // if (arg) {
-      //   return {
-      //     ...acc,
-      //     [`${key}Ids`]: params.data[key].map(({ id }) => id)
-      //   };
-      // }
-      return acc;
-    }
-
-    if (typeof params.data[key] === 'object') {
-      const fields = updateFields(
-        params.data[key],
+      const inputType = findInputFieldForType(
         introspectionResults,
         `${resource.type.name}UpdateInput`,
         key
       );
 
-      if (Object.keys(fields.connect).length > 0) {
+      if (!inputType) {
+        return acc;
+      }
+
+      //TODO: Make connect, disconnect and update overridable
+      const fieldsToAdd = computeFieldsToAdd(
+        params.previousData[`${key}Ids`],
+        params.data[`${key}Ids`]
+      );
+      const fieldsToRemove = computeFieldsToRemove(
+        params.previousData[`${key}Ids`],
+        params.data[`${key}Ids`]
+      );
+      const fieldsToUpdate = computeFieldsToUpdate(
+        params.previousData[`${key}Ids`],
+        params.data[`${key}Ids`]
+      );
+
+      return {
+        ...acc,
+        data: {
+          ...acc.data,
+          [key]: {
+            connect: fieldsToAdd,
+            disconnect: fieldsToRemove,
+            update: fieldsToUpdate
+          }
+        }
+      };
+    }
+
+    if (isObject(params.data[key])) {
+      const fieldsToUpdate = buildReferenceField(
+        params.data[key],
+        introspectionResults,
+        `${resource.type.name}UpdateInput`,
+        key,
+        'connect'
+      );
+
+      if (Object.keys(fieldsToUpdate).length > 0) {
         return {
           ...acc,
           data: {
             ...acc.data,
-            [key]: fields
+            [key]: fieldsToUpdate
           }
         };
       } else {
@@ -198,40 +211,42 @@ const buildUpdateVariables = introspectionResults => (resource, aorFetchType, pa
 
     return acc;
   }, {});
+};
 
-const buildCreateVariables = introspectionResults => (resource, aorFetchType, params, queryType) =>
+const buildCreateVariables = introspectionResults => (resource, aorFetchType, params) =>
   Object.keys(params.data).reduce((acc, key) => {
     if (Array.isArray(params.data[key])) {
-      // const arg = queryType.args.find(a => a.name === `${key}Ids`);
-      //
-      // if (arg) {
-      //   return {
-      //     ...acc,
-      //     [`${key}Ids`]: params.data[key].map(({ id }) => id)
-      //   };
-      // }
-      return acc;
+      if (!inputFieldExistForType(introspectionResults, `${resource.type.name}CreateInput`, key)) {
+        return acc;
+      }
+
+      return {
+        ...acc,
+        data: {
+          ...acc.data,
+          [key]: {
+            connect: params.data[`${key}Ids`].map(id => ({ id }))
+          }
+        }
+      };
     }
 
-    if (typeof params.data[key] === 'object') {
-      const fields = connectFields(
+    if (isObject(params.data[key])) {
+      const fieldsToConnect = buildReferenceField(
         params.data[key],
         introspectionResults,
         `${resource.type.name}CreateInput`,
-        key
+        key,
+        'connect'
       );
 
-      if (Object.keys(fields.connect).length > 0) {
-        return {
-          ...acc,
-          data: {
-            ...acc.data,
-            [key]: fields
-          }
-        };
-      } else {
+      // If no fields in the object are valid, continue
+      if (Object.keys(fieldsToConnect).length === 0) {
         return acc;
       }
+
+      // Else, connect the nodes
+      return { ...acc, data: { ...acc.data, [key]: { connect: { ...fieldsToConnect } } } };
     }
 
     // Put id field in a where object
@@ -267,15 +282,6 @@ export default introspectionResults => (resource, aorFetchType, params, queryTyp
       return buildGetListVariables(introspectionResults)(resource, aorFetchType, params, queryType);
     }
     case GET_MANY:
-      if (typeof params.ids[0] === 'object') {
-        return {
-          where: {
-            id_in: params.ids.map(
-              objectId => (typeof objectId === 'object' ? objectId.id : objectId)
-            )
-          }
-        };
-      }
       return {
         where: { id_in: params.ids }
       };
@@ -291,29 +297,11 @@ export default introspectionResults => (resource, aorFetchType, params, queryTyp
         where: { id: params.id }
       };
     case UPDATE: {
-      const updateParams = buildUpdateVariables(introspectionResults)(
-        resource,
-        aorFetchType,
-        params,
-        queryType
-      );
-
-      //console.log("params", params);
-      //console.log("updateParams", updateParams);
-      return updateParams;
+      return buildUpdateVariables(introspectionResults)(resource, aorFetchType, params);
     }
 
     case CREATE: {
-      const createParams = buildCreateVariables(introspectionResults)(
-        resource,
-        aorFetchType,
-        params,
-        queryType
-      );
-
-      //console.log("params", params);
-      //console.log("createParams", createParams);
-      return createParams;
+      return buildCreateVariables(introspectionResults)(resource, aorFetchType, params);
     }
 
     case DELETE:
