@@ -38,7 +38,7 @@ export const OptionList = props => (
     <Datagrid>
       <TextField source="id" />
       <TextField source="name" />
-      <ReferenceManyField label="Option values" target="option.id" reference="OptionValue">
+      <ReferenceManyField label="Values" target="option.id" reference="OptionValue">
         <SingleFieldList>
           <ChipField source="name" />
         </SingleFieldList>
@@ -57,7 +57,7 @@ export const OptionEdit = props => (
     <SimpleForm>
       <DisabledInput source="id" />
       <TextInput source="name" />
-      <ReferenceArrayInput source="values" reference="OptionValue" perPage={200}>
+      <ReferenceArrayInput label="Values" source="valuesIds" reference="OptionValue" perPage={200}>
         <SelectArrayInput optionText="name" />
       </ReferenceArrayInput>
     </SimpleForm>
@@ -72,7 +72,7 @@ export const OptionShow = props => (
       <ReferenceField source="shop.id" reference="Shop">
         <TextField source="name" />
       </ReferenceField>
-      <ReferenceManyField label="Option values" target="option.id" reference="OptionValue">
+      <ReferenceManyField label="Values" target="option.id" reference="OptionValue">
         <SingleFieldList>
           <ChipField source="name" />
         </SingleFieldList>
@@ -86,6 +86,12 @@ export const OptionCreate = props => (
     <SimpleForm>
       <DisabledInput source="id" />
       <TextInput source="name" />
+      <ReferenceInput source="category.id" reference="Category">
+        <SelectInput optionText="name"/>
+      </ReferenceInput>
+      <ReferenceArrayInput label="Values" source="valuesIds" reference="OptionValue" perPage={200}>
+        <SelectArrayInput optionText="name" />
+      </ReferenceArrayInput>
       <ReferenceInput source="shop.id" reference="Shop">
         <SelectInput optionText="name" />
       </ReferenceInput>
