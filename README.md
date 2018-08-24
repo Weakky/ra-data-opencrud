@@ -7,6 +7,14 @@ https://github.com/moritzmorgenroth/ra-data-prisma
 
 ## This adaptator is currently under active development. Below is a quick explanation of the challenges that'll be faced.
 
+### Try on codesandbox
+
+If you wanna give it a try anyway, here's a quick preview on codesandbox.
+The API is hosted on Prisma's public servers, which means the API is limited to 10 API calls per seconds.
+Be aware that it might not be working because of that, or that performances may be poor.
+
+[![Edit ra-data-prisma](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/Weakky/ra-data-prisma/tree/master/)
+
 # Summary
 
 1. Context
