@@ -5,7 +5,12 @@
 Other WIP adaptators:</br>
 https://github.com/moritzmorgenroth/ra-data-prisma
 
-## This adaptator is currently under active development. Below is a quick explanation of the challenges that'll be faced.
+### Work in progress
+
+#### This adaptator is currently under active development.
+I am using [prisma-ecommerce's](https://github.com/Weakky/prisma-ecommerce/) prisma API to easily test the data provider, hence the react app present on the repository.
+Once the data provider will be stable enough, I'll remove every trace of react, and let it be a standalone react-admin data provider as it should be.
+The react-app will be extracted from that repo to replace the current backoffice used in [prisma-ecommerce](https://github.com/Weakky/prisma-ecommerce/).
 
 ### Try on codesandbox
  If you wanna give it a try anyway, here's a quick preview on codesandbox.
