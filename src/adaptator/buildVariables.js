@@ -155,17 +155,13 @@ const buildUpdateVariables = introspectionResults => (resource, aorFetchType, pa
         mutationType: PRISMA_CONNECT
       });
 
-      if (Object.keys(fieldsToUpdate).length > 0) {
-        return {
-          ...acc,
-          data: {
-            ...acc.data,
-            [key]: fieldsToUpdate
-          }
-        };
-      } else {
+      // If no fields in the object are valid, continue
+      if (Object.keys(fieldsToUpdate).length === 0) {
         return acc;
       }
+
+      // Else, connect the nodes
+      return { ...acc, data: { ...acc.data, [key]: { [PRISMA_CONNECT]: { ...fieldsToUpdate } } } };
     }
 
     // Put id field in a where object
