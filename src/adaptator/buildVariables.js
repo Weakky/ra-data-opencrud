@@ -128,6 +128,7 @@ const buildUpdateVariables = introspectionResults => (resource, aorFetchType, pa
       }
 
       //TODO: Make connect, disconnect and update overridable
+      //TODO: Make updates working
       const { fieldsToAdd, fieldsToRemove, fieldsToUpdate } = computeFieldsToAddRemoveUpdate(
         params.previousData[`${key}Ids`],
         params.data[`${key}Ids`]
@@ -140,7 +141,7 @@ const buildUpdateVariables = introspectionResults => (resource, aorFetchType, pa
           [key]: {
             [PRISMA_CONNECT]: fieldsToAdd,
             [PRISMA_DISCONNECT]: fieldsToRemove,
-            [PRISMA_UPDATE]: fieldsToUpdate
+            //[PRISMA_UPDATE]: fieldsToUpdate
           }
         }
       };
