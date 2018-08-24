@@ -53,7 +53,6 @@ export default introspectionResults => (aorFetchType, resource) => response => {
     aorFetchType === GET_MANY ||
     aorFetchType === GET_MANY_REFERENCE
   ) {
-    console.log(aorFetchType, response.data.items.map(sanitize));
     return {
       data: response.data.items.map(sanitize),
       total: response.data.total.aggregate.count
