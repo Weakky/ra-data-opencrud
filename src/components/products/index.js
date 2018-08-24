@@ -46,6 +46,9 @@ export const ProductList = props => (
       <ReferenceField label="Category" source="category.id" reference="Category">
         <TextField source="name" />
       </ReferenceField>
+      <ReferenceField label="Shop" source="shop.id" reference="Shop">
+        <TextField source="name" />
+      </ReferenceField>
       <EditButton/>
       <ShowButton/>
     </Datagrid>

@@ -32,18 +32,17 @@ export const ShopList = props => (
     <Datagrid>
       <TextField source="id"/>
       <TextField source="name"/>
-      <ReferenceManyField label="Options" target="shop.id" reference="Option">
-        <Datagrid>
-          <TextField source="name"/>
-          <ReferenceManyField label="Option values" target="option.id" reference="OptionValue">
-            <SingleFieldList>
-              <ChipField source="name"/>
-            </SingleFieldList>
-          </ReferenceManyField>
-        </Datagrid>
-      </ReferenceManyField>
       <EditButton/>
       <ShowButton/>
     </Datagrid>
   </List>
+);
+
+export const ShopEdit = props => (
+  <Edit title="Edit a shop" {...props}>
+    <SimpleForm>
+      <DisabledInput source="id" />
+      <TextInput source="name" />
+    </SimpleForm>
+  </Edit>
 );

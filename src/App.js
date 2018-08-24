@@ -22,7 +22,7 @@ import {
 import buildPrismaProvider from './adaptator';
 
 import { ProductEdit, ProductList } from './components/products';
-import { ShopList } from './components/shops';
+import { ShopEdit, ShopList } from './components/shops';
 import { OrderList } from './components/orders';
 import { VariantList } from './components/variants';
 import { CategoryCreate, CategoryEdit, CategoryList, CategoryShow } from './components/categories';
@@ -44,7 +44,7 @@ class App extends Component {
 
   componentDidMount() {
     buildPrismaProvider({
-      clientOptions: { uri: 'http://localhost:4466/aromaclop/dev1' }
+      clientOptions: { uri: 'https://eu1.prisma.sh/flavian/ra-data-prisma/dev' }
     }).then(dataProvider => this.setState({ dataProvider }));
   }
 
@@ -80,7 +80,7 @@ class App extends Component {
           show={CategoryShow}
           create={CategoryCreate}
         />
-        <Resource name="Shop" list={ShopList} />
+        <Resource name="Shop" list={ShopList} edit={ShopEdit} />
         <Resource
           name="Option"
           list={OptionList}
