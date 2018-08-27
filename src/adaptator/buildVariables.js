@@ -22,6 +22,20 @@ const buildGetListVariables = introspectionResults => (resource, aorFetchType, p
       return { ...acc, id_in: params.filter[key] };
     }
 
+    if (Array.isArray(params.filter[key])) {
+      const type = introspectionResults.types.find(
+        t => t.name === `${resource.type.name}WhereInput`
+      );
+      const inputField = type.inputFields.find(t => t.name === key);
+
+      if (!!inputField) {
+        return {
+          ...acc,
+          [key]: { id_in: params.filter[key] }
+        };
+      }
+    }
+
     if (isObject(params.filter[key])) {
       const type = introspectionResults.types.find(
         t => t.name === `${resource.type.name}WhereInput`

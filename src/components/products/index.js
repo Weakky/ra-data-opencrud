@@ -30,7 +30,13 @@ export const ProductFilter = props => (
     <ReferenceInput label="Shop" source="shop.id" reference="Shop" alwaysOn>
       <SelectInput optionText="name"/>
     </ReferenceInput>
-    <ReferenceArrayInput label="Options" source="options" reference="Option">
+    <ReferenceArrayInput label="Brands" source="brand" reference="Brand">
+      <SelectArrayInput optionText="name" />
+    </ReferenceArrayInput>
+    <ReferenceArrayInput label="Attributes" source="attributes_some" reference="Attribute">
+      <SelectArrayInput optionText="value" />
+    </ReferenceArrayInput>
+    <ReferenceArrayInput label="Options" source="options_some" reference="Option">
       <SelectArrayInput optionText="name" />
     </ReferenceArrayInput>
   </Filter>
@@ -44,6 +50,11 @@ export const ProductList = props => (
       <ReferenceField label="Brand" source="brand.id" reference="Brand">
         <TextField source="name" />
       </ReferenceField>
+      <ReferenceManyField label="Attributes" target="products_some.id" reference="Attribute">
+        <SingleFieldList>
+          <ChipField source="value"/>
+        </SingleFieldList>
+      </ReferenceManyField>
       <ReferenceField label="Category" source="category.id" reference="Category">
         <TextField source="name" />
       </ReferenceField>
