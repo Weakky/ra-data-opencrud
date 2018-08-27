@@ -1,5 +1,3 @@
-//TODO: Manage to edit a simple user ("index.js:2178 Warning: Missing translation for key: "params cannot be empty"")
-
 import {
   Edit,
   List,
@@ -32,6 +30,9 @@ export const ProductFilter = props => (
     <ReferenceInput label="Shop" source="shop.id" reference="Shop" alwaysOn>
       <SelectInput optionText="name"/>
     </ReferenceInput>
+    <ReferenceArrayInput label="Options" source="options" reference="Option">
+      <SelectArrayInput optionText="name" />
+    </ReferenceArrayInput>
   </Filter>
 );
 

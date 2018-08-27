@@ -1,5 +1,3 @@
-//TODO: Manage to edit a simple user ("index.js:2178 Warning: Missing translation for key: "params cannot be empty"")
-
 import {
   Edit,
   List,
