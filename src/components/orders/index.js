@@ -76,21 +76,3 @@ export const OrderList = props => (
     </Datagrid>
   </List>
 );
-
-export const CommentEdit = props => (
-  <Edit title="Edit a comment" {...props}>
-    <SimpleForm>
-      <DisabledInput source="id" />
-      <TextInput source="content" />
-    </SimpleForm>
-  </Edit>
-);
-
-export const CommentShow = props => (
-  <Edit title="Show a user" {...props}>
-    <SimpleForm>
-      <DisabledInput source="id" />
-      <TextInput source="content" />
-    </SimpleForm>
-  </Edit>
-);
