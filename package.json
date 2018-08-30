@@ -1,7 +1,7 @@
 {
-  "name": "ra-data-prisma",
+  "name": "react-admin-prisma",
   "version": "0.1.0",
-  "private": true,
+  "main": "lib/adaptator/index.js",
   "dependencies": {
     "@material-ui/core": "~1.4.0",
     "@material-ui/icons": "~1.1.0",
@@ -21,6 +21,9 @@
     "react-admin": "^2.0.3"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "graphql": "^0.13.2",
     "react-admin": "^2.0.3"
   },
@@ -28,6 +31,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dist": "babel src -d lib"
   }
 }
