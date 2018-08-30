@@ -1,30 +1,14 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import {
-  Admin,
-  Resource,
-  Delete,
-  List,
-  Datagrid,
-  TextField,
-  ReferenceField,
-  ReferenceManyField,
-  EditButton,
-  ShowButton,
-  Edit,
-  DisabledInput,
-  TextInput,
-  SimpleForm,
-  SingleFieldList,
-  ChipField
-} from 'react-admin';
+import { Admin, Resource, GET_LIST } from 'react-admin';
+import gql from 'graphql-tag';
+
 import buildPrismaProvider from './adaptator';
 
 import { ProductEdit, ProductList } from './components/products';
 import { ShopEdit, ShopList } from './components/shops';
 import { OrderList } from './components/orders';
-import { VariantList } from './components/variants';
 import { CategoryCreate, CategoryEdit, CategoryList, CategoryShow } from './components/categories';
 import { BrandCreate, BrandEdit, BrandList, BrandShow } from './components/brands';
 import {
@@ -44,7 +28,97 @@ class App extends Component {
 
   componentDidMount() {
     buildPrismaProvider({
-      clientOptions: { uri: 'https://eu1.prisma.sh/flavian/ra-data-prisma/dev' }
+      clientOptions: { uri: 'https://eu1.prisma.sh/flavian/ra-data-prisma/dev' },
+      overrideQueriesByFragment: {
+        Product: {
+          [GET_LIST]: gql`
+            fragment product on Product {
+              id
+              name
+              description
+              brand {
+                id
+                name
+              }
+              category {
+                id
+                name
+              }
+              shop {
+                id
+                name
+              }
+              attributes {
+                id
+                value
+              }
+            }
+          `
+        },
+        Order: {
+          [GET_LIST]: gql`
+            fragment order on Order {
+              id
+              totalPrice
+              owner {
+                id
+                firstName
+              }
+              lineItems {
+                id
+                quantity
+                variant {
+                  id
+                  available
+                  price
+                  product {
+                    id
+                    name
+                  }
+                  selectedOptions {
+                    id
+                    value {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          `
+        },
+        Brand: {
+          [GET_LIST]: `{
+            id
+            name
+            category { id name }
+            shop { id name }
+          }`
+        },
+        Category: {
+          [GET_LIST]: `{
+            id
+            name
+            shop { id name }
+          }`
+        },
+        Attribute: {
+          [GET_LIST]: `{
+            id
+            value
+            category { id name }
+            shop { id name }
+          }`
+        },
+        Option: {
+          [GET_LIST]: ` {
+            id
+            name
+            values { id name }
+            shop { id name }
+          }`
+        }
+      }
     }).then(dataProvider => this.setState({ dataProvider }));
   }
 

@@ -1,6 +1,7 @@
 import { GET_LIST, GET_MANY, GET_MANY_REFERENCE, DELETE } from 'react-admin';
 import { QUERY_TYPES } from 'ra-data-graphql';
-import { TypeKind } from 'graphql';
+import { TypeKind, parse } from 'graphql';
+import get from 'lodash/get';
 
 import { encodeQuery, encodeMutation } from './utils/graphqlify';
 import getFinalType from './utils/getFinalType';
@@ -77,10 +78,55 @@ export const buildApolloArgs = (query, variables) => {
   return args;
 };
 
-export default introspectionResults => (resource, aorFetchType, queryType, variables) => {
+const getOverridenQuery = (overrideQueriesByFragment, resourceName, aorFetchType) => {
+  return get(overrideQueriesByFragment, `${resourceName}.${aorFetchType}`);
+};
+
+const isQueryOverriden = (overrideQueriesByFragment, resourceName, aorFetchType) => {
+  return !!getOverridenQuery(overrideQueriesByFragment, resourceName, aorFetchType);
+};
+
+const convertSelectionSetToGraphqlifyFields = selectionSet => {
+  return selectionSet.selections.reduce((acc, selection) => {
+    if (!selection.selectionSet) {
+      return { ...acc, [selection.name.value]: {} };
+    }
+
+    return {
+      ...acc,
+      [selection.name.value]: {
+        fields: convertSelectionSetToGraphqlifyFields(selection.selectionSet)
+      }
+    };
+  }, {});
+};
+
+const buildFieldsFromFragment = fragment => {
+  let parsedFragment = {};
+
+  if (typeof fragment === 'object' && fragment.kind === 'Document') {
+    parsedFragment = fragment;
+  } else if (typeof fragment === 'string') {
+    parsedFragment = parse(fragment);
+  }
+
+  return convertSelectionSetToGraphqlifyFields(parsedFragment.definitions[0].selectionSet);
+};
+
+export default introspectionResults => (
+  resource,
+  aorFetchType,
+  queryType,
+  variables,
+  overrideQueriesByFragment
+) => {
   const apolloArgs = buildApolloArgs(queryType, variables);
   const args = buildArgs(queryType, variables);
-  const fields = buildFields(introspectionResults)(resource.type.fields);
+  const fields = isQueryOverriden(overrideQueriesByFragment, resource.type.name, aorFetchType)
+    ? buildFieldsFromFragment(
+        getOverridenQuery(overrideQueriesByFragment, resource.type.name, aorFetchType)
+      )
+    : buildFields(introspectionResults)(resource.type.fields);
 
   if (
     aorFetchType === GET_LIST ||
