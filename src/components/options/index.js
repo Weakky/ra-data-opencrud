@@ -21,7 +21,8 @@ import {
   NumberField,
   BooleanField,
   SelectInput,
-  SimpleShowLayout
+  SimpleShowLayout,
+  ArrayField
 } from 'react-admin';
 import React from 'react';
 
@@ -39,14 +40,12 @@ export const OptionList = props => (
     <Datagrid>
       <TextField source="id" />
       <TextField source="name" />
-      <ReferenceManyField label="Values" target="option.id" reference="OptionValue">
+      <ArrayField label="Values" source="values" reference="OptionValue">
         <SingleFieldList>
           <ChipField source="name" />
         </SingleFieldList>
-      </ReferenceManyField>
-      <ReferenceField source="shop.id" reference="Shop">
-        <TextField source="name" />
-      </ReferenceField>
+      </ArrayField>
+      <TextField label="Shop" source="shop.name" />
       <EditButton />
       <ShowButton />
     </Datagrid>

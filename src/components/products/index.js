@@ -20,7 +20,8 @@ import {
   SelectArrayInput,
   SelectInput,
   ArrayInput,
-  SimpleFormIterator
+  SimpleFormIterator,
+  ArrayField
 } from "react-admin";
 import React from 'react'
 
@@ -47,20 +48,14 @@ export const ProductList = props => (
     <Datagrid>
       <TextField source="id"/>
       <TextField source="name"/>
-      <ReferenceField label="Brand" source="brand.id" reference="Brand">
-        <TextField source="name" />
-      </ReferenceField>
-      <ReferenceManyField label="Attributes" target="products_some.id" reference="Attribute">
+      <TextField label="Brand" source="brand.name" />
+      <ArrayField label="Attributes" source="attributes" reference="Attribute">
         <SingleFieldList>
           <ChipField source="value"/>
         </SingleFieldList>
-      </ReferenceManyField>
-      <ReferenceField label="Category" source="category.id" reference="Category">
-        <TextField source="name" />
-      </ReferenceField>
-      <ReferenceField label="Shop" source="shop.id" reference="Shop">
-        <TextField source="name" />
-      </ReferenceField>
+      </ArrayField>
+      <TextField label="Category" source="category.name" />
+      <TextField label="Shop" source="shop.name" />
       <EditButton/>
       <ShowButton/>
     </Datagrid>

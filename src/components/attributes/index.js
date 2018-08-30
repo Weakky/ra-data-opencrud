@@ -40,12 +40,8 @@ export const AttributeList = props => (
     <Datagrid>
       <TextField source="id" />
       <TextField source="value" />
-      <ReferenceField source="category.id" reference="Category">
-        <TextField source="name" />
-      </ReferenceField>
-      <ReferenceField source="shop.id" reference="Shop">
-        <TextField source="name" />
-      </ReferenceField>
+      <TextField label="Category" source="category.name" />
+      <TextField label="Shop" source="shop.name" />
       <EditButton />
       <ShowButton />
     </Datagrid>
@@ -72,12 +68,8 @@ export const AttributeShow = props => (
     <SimpleShowLayout>
       <TextField source="id" />
       <TextField source="value" />
-      <ReferenceField source="category.id" reference="Category">
-        <TextField source="name" />
-      </ReferenceField>
-      <ReferenceField source="shop.id" reference="Shop">
-        <TextField source="name" />
-      </ReferenceField>
+      <TextField label="Category" source="category.name" />
+      <TextField label= "Shop" source="shop.name" />
     </SimpleShowLayout>
   </Show>
 );
