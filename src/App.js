@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import './App.css';
-
 import { Admin, Resource, GET_LIST } from 'react-admin';
-import gql from 'graphql-tag';
+import get from 'lodash/get';
 
-import buildPrismaProvider from './adaptator';
+import buildPrismaProvider, { buildQuery } from './adaptator';
+import overridenQueries from './queries';
 
 import { ProductEdit, ProductList } from './components/products';
 import { ShopEdit, ShopList } from './components/shops';
@@ -19,6 +18,14 @@ import {
 } from './components/attributes';
 import { OptionCreate, OptionEdit, OptionList, OptionShow } from './components/options';
 
+import './App.css';
+
+const decoratedBuildQuery = (buildQuery) => (introspectionResults) => (fetchType, resourceName, params) => {
+  const fragment = get(overridenQueries, `${resourceName}.${fetchType}`);
+
+  return buildQuery(introspectionResults)(fetchType, resourceName, params, fragment);
+};
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -29,96 +36,7 @@ class App extends Component {
   componentDidMount() {
     buildPrismaProvider({
       clientOptions: { uri: 'https://eu1.prisma.sh/flavian/ra-data-prisma/dev' },
-      overrideQueriesByFragment: {
-        Product: {
-          [GET_LIST]: gql`
-            fragment product on Product {
-              id
-              name
-              description
-              brand {
-                id
-                name
-              }
-              category {
-                id
-                name
-              }
-              shop {
-                id
-                name
-              }
-              attributes {
-                id
-                value
-              }
-            }
-          `
-        },
-        Order: {
-          [GET_LIST]: gql`
-            fragment order on Order {
-              id
-              totalPrice
-              owner {
-                id
-                firstName
-              }
-              lineItems {
-                id
-                quantity
-                variant {
-                  id
-                  available
-                  price
-                  product {
-                    id
-                    name
-                  }
-                  selectedOptions {
-                    id
-                    value {
-                      id
-                      name
-                    }
-                  }
-                }
-              }
-            }
-          `
-        },
-        Brand: {
-          [GET_LIST]: `{
-            id
-            name
-            category { id name }
-            shop { id name }
-          }`
-        },
-        Category: {
-          [GET_LIST]: `{
-            id
-            name
-            shop { id name }
-          }`
-        },
-        Attribute: {
-          [GET_LIST]: `{
-            id
-            value
-            category { id name }
-            shop { id name }
-          }`
-        },
-        Option: {
-          [GET_LIST]: ` {
-            id
-            name
-            values { id name }
-            shop { id name }
-          }`
-        }
-      }
+      buildQuery: decoratedBuildQuery(buildQuery)
     }).then(dataProvider => this.setState({ dataProvider }));
   }
 

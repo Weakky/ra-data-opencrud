@@ -1,7 +1,6 @@
 import { GET_LIST, GET_MANY, GET_MANY_REFERENCE, DELETE } from 'react-admin';
 import { QUERY_TYPES } from 'ra-data-graphql';
 import { TypeKind, parse } from 'graphql';
-import get from 'lodash/get';
 
 import { encodeQuery, encodeMutation } from './utils/graphqlify';
 import getFinalType from './utils/getFinalType';
@@ -78,14 +77,6 @@ export const buildApolloArgs = (query, variables) => {
   return args;
 };
 
-const getOverridenQuery = (overrideQueriesByFragment, resourceName, aorFetchType) => {
-  return get(overrideQueriesByFragment, `${resourceName}.${aorFetchType}`);
-};
-
-const isQueryOverriden = (overrideQueriesByFragment, resourceName, aorFetchType) => {
-  return !!getOverridenQuery(overrideQueriesByFragment, resourceName, aorFetchType);
-};
-
 const convertSelectionSetToGraphqlifyFields = selectionSet => {
   return selectionSet.selections.reduce((acc, selection) => {
     if (!selection.selectionSet) {
@@ -102,37 +93,33 @@ const convertSelectionSetToGraphqlifyFields = selectionSet => {
 };
 
 //TODO: validate fragment against the schema
-const buildFieldsFromFragment = (fragment, typeName) => {
+const buildFieldsFromFragment = (fragment, resourceName, fetchType) => {
   let parsedFragment = {};
 
   if (typeof fragment === 'object' && fragment.kind && fragment.kind === 'Document') {
     parsedFragment = fragment;
-  } else if (typeof fragment === 'string') {
+  }
 
+  if (typeof fragment === 'string') {
     if (!fragment.startsWith('fragment')) {
-      fragment = `fragment tmp on ${typeName} ${fragment}`;
+      fragment = `fragment tmp on ${resourceName} ${fragment}`;
     }
 
-    parsedFragment = parse(fragment);
+    try {
+      parsedFragment = parse(fragment);
+    } catch (e) {
+      throw new Error(`Invalid fragment given for resource '${resourceName}' and fetchType '${fetchType}' (${e.message}).`)
+    }
   }
 
   return convertSelectionSetToGraphqlifyFields(parsedFragment.definitions[0].selectionSet);
 };
 
-export default introspectionResults => (
-  resource,
-  aorFetchType,
-  queryType,
-  variables,
-  overrideQueriesByFragment
-) => {
+export default introspectionResults => (resource, aorFetchType, queryType, variables, fragment) => {
   const apolloArgs = buildApolloArgs(queryType, variables);
   const args = buildArgs(queryType, variables);
-  const fields = isQueryOverriden(overrideQueriesByFragment, resource.type.name, aorFetchType)
-    ? buildFieldsFromFragment(
-        getOverridenQuery(overrideQueriesByFragment, resource.type.name, aorFetchType),
-        resource.type.name
-      )
+  const fields = !!fragment
+    ? buildFieldsFromFragment(fragment, resource.type.name, aorFetchType)
     : buildFields(introspectionResults)(resource.type.fields);
 
   if (

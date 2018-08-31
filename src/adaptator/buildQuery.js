@@ -7,10 +7,10 @@ export const buildQueryFactory = (
   buildVariablesImpl,
   buildGqlQueryImpl,
   getResponseParserImpl
-) => (introspectionResults, otherOptions) => {
+) => (introspectionResults) => {
   const knownResources = introspectionResults.resources.map(r => r.type.name);
 
-  return (aorFetchType, resourceName, params) => {
+  return (aorFetchType, resourceName, params, fragment) => {
     const resource = introspectionResults.resources.find(r => r.type.name === resourceName);
 
     if (!resource) {
@@ -31,20 +31,18 @@ export const buildQueryFactory = (
       );
     }
 
-    const { overrideQueriesByFragment } = otherOptions;
-
     const variables = buildVariablesImpl(introspectionResults)(
       resource,
       aorFetchType,
       params,
-      queryType,
+      queryType
     );
     const query = buildGqlQueryImpl(introspectionResults)(
       resource,
       aorFetchType,
       queryType,
       variables,
-      overrideQueriesByFragment
+      fragment
     );
     const parseResponse = getResponseParserImpl(introspectionResults)(
       aorFetchType,

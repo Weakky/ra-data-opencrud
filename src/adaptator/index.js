@@ -15,7 +15,9 @@ import {
   UPDATE_MANY
 } from 'react-admin';
 
-import buildQuery from './buildQuery';
+import prismaBuildQuery from './buildQuery';
+
+export const buildQuery = prismaBuildQuery;
 
 const defaultOptions = {
   buildQuery,
@@ -35,10 +37,10 @@ const defaultOptions = {
 };
 
 //TODO: Prisma supports batching (UPDATE_MANY, DELETE_MANY)
-export default async options => {
-  const graphQLDataProvider = await buildDataProvider(merge({}, defaultOptions, options));
-
-  return (fetchType, resource, params) => {
-    return graphQLDataProvider(fetchType, resource, params);
-  };
+export default options => {
+  return buildDataProvider(merge({}, defaultOptions, options)).then(graphQLDataProvider => {
+    return (fetchType, resource, params) => {
+      return graphQLDataProvider(fetchType, resource, params);
+    };
+  });
 };
