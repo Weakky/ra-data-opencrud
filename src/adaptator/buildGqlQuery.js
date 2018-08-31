@@ -101,12 +101,18 @@ const convertSelectionSetToGraphqlifyFields = selectionSet => {
   }, {});
 };
 
-const buildFieldsFromFragment = fragment => {
+//TODO: validate fragment against the schema
+const buildFieldsFromFragment = (fragment, typeName) => {
   let parsedFragment = {};
 
-  if (typeof fragment === 'object' && fragment.kind === 'Document') {
+  if (typeof fragment === 'object' && fragment.kind && fragment.kind === 'Document') {
     parsedFragment = fragment;
   } else if (typeof fragment === 'string') {
+
+    if (!fragment.startsWith('fragment')) {
+      fragment = `fragment tmp on ${typeName} ${fragment}`;
+    }
+
     parsedFragment = parse(fragment);
   }
 
@@ -124,7 +130,8 @@ export default introspectionResults => (
   const args = buildArgs(queryType, variables);
   const fields = isQueryOverriden(overrideQueriesByFragment, resource.type.name, aorFetchType)
     ? buildFieldsFromFragment(
-        getOverridenQuery(overrideQueriesByFragment, resource.type.name, aorFetchType)
+        getOverridenQuery(overrideQueriesByFragment, resource.type.name, aorFetchType),
+        resource.type.name
       )
     : buildFields(introspectionResults)(resource.type.fields);
 
