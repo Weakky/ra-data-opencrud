@@ -1,6 +1,6 @@
 import { GET_LIST, GET_MANY, GET_MANY_REFERENCE, DELETE } from 'react-admin';
 import { QUERY_TYPES } from 'ra-data-graphql';
-import { TypeKind } from 'graphql';
+import { TypeKind, parse } from 'graphql';
 
 import { encodeQuery, encodeMutation } from './utils/graphqlify';
 import getFinalType from './utils/getFinalType';
@@ -77,10 +77,50 @@ export const buildApolloArgs = (query, variables) => {
   return args;
 };
 
-export default introspectionResults => (resource, aorFetchType, queryType, variables) => {
+const convertSelectionSetToGraphqlifyFields = selectionSet => {
+  return selectionSet.selections.reduce((acc, selection) => {
+    if (!selection.selectionSet) {
+      return { ...acc, [selection.name.value]: {} };
+    }
+
+    return {
+      ...acc,
+      [selection.name.value]: {
+        fields: convertSelectionSetToGraphqlifyFields(selection.selectionSet)
+      }
+    };
+  }, {});
+};
+
+//TODO: validate fragment against the schema
+const buildFieldsFromFragment = (fragment, resourceName, fetchType) => {
+  let parsedFragment = {};
+
+  if (typeof fragment === 'object' && fragment.kind && fragment.kind === 'Document') {
+    parsedFragment = fragment;
+  }
+
+  if (typeof fragment === 'string') {
+    if (!fragment.startsWith('fragment')) {
+      fragment = `fragment tmp on ${resourceName} ${fragment}`;
+    }
+
+    try {
+      parsedFragment = parse(fragment);
+    } catch (e) {
+      throw new Error(`Invalid fragment given for resource '${resourceName}' and fetchType '${fetchType}' (${e.message}).`)
+    }
+  }
+
+  return convertSelectionSetToGraphqlifyFields(parsedFragment.definitions[0].selectionSet);
+};
+
+export default introspectionResults => (resource, aorFetchType, queryType, variables, fragment) => {
   const apolloArgs = buildApolloArgs(queryType, variables);
   const args = buildArgs(queryType, variables);
-  const fields = buildFields(introspectionResults)(resource.type.fields);
+  const fields = !!fragment
+    ? buildFieldsFromFragment(fragment, resource.type.name, aorFetchType)
+    : buildFields(introspectionResults)(resource.type.fields);
 
   if (
     aorFetchType === GET_LIST ||

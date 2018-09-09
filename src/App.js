@@ -1,30 +1,13 @@
 import React, { Component } from 'react';
-import './App.css';
+import { Admin, Resource, GET_LIST } from 'react-admin';
+import get from 'lodash/get';
 
-import {
-  Admin,
-  Resource,
-  Delete,
-  List,
-  Datagrid,
-  TextField,
-  ReferenceField,
-  ReferenceManyField,
-  EditButton,
-  ShowButton,
-  Edit,
-  DisabledInput,
-  TextInput,
-  SimpleForm,
-  SingleFieldList,
-  ChipField
-} from 'react-admin';
-import buildPrismaProvider from './adaptator';
+import buildPrismaProvider, { buildQuery } from './adaptator';
+import overridenQueries from './queries';
 
 import { ProductEdit, ProductList } from './components/products';
 import { ShopEdit, ShopList } from './components/shops';
 import { OrderList } from './components/orders';
-import { VariantList } from './components/variants';
 import { CategoryCreate, CategoryEdit, CategoryList, CategoryShow } from './components/categories';
 import { BrandCreate, BrandEdit, BrandList, BrandShow } from './components/brands';
 import {
@@ -35,6 +18,14 @@ import {
 } from './components/attributes';
 import { OptionCreate, OptionEdit, OptionList, OptionShow } from './components/options';
 
+import './App.css';
+
+const decoratedBuildQuery = (buildQuery) => (introspectionResults) => (fetchType, resourceName, params) => {
+  const fragment = get(overridenQueries, `${resourceName}.${fetchType}`);
+
+  return buildQuery(introspectionResults)(fetchType, resourceName, params, fragment);
+};
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -44,7 +35,8 @@ class App extends Component {
 
   componentDidMount() {
     buildPrismaProvider({
-      clientOptions: { uri: 'https://eu1.prisma.sh/flavian/ra-data-prisma/dev' }
+      clientOptions: { uri: 'https://eu1.prisma.sh/flavian/ra-data-prisma/dev' },
+      buildQuery: decoratedBuildQuery(buildQuery)
     }).then(dataProvider => this.setState({ dataProvider }));
   }
 

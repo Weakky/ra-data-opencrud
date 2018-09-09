@@ -39,9 +39,7 @@ export const CategoryList = props => (
     <Datagrid>
       <TextField source="id" />
       <TextField source="name" />
-      <ReferenceField source="shop.id" reference="Shop">
-        <TextField source="name" />
-      </ReferenceField>
+      <TextField label="Shop" source="shop.name" />
       <EditButton />
       <ShowButton />
     </Datagrid>

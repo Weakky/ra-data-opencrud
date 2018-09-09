@@ -15,7 +15,8 @@ import {
   TextInput,
   NumberField,
   FunctionField,
-  BooleanField, Filter, ReferenceInput, SelectInput
+  BooleanField, Filter, ReferenceInput, SelectInput,
+  ArrayField
 } from 'react-admin';
 import React from "react";
 
@@ -30,43 +31,30 @@ export const OrderFilter = props => (
 export const OrderList = props => (
   <List filters={<OrderFilter />} {...props}>
     <Datagrid>
-      <ReferenceField label="Buyer" source="owner.id" reference="User">
-        <TextField source="firstName" />
-      </ReferenceField>
+      <TextField label="Buyer" source="owner.firstName" />
 
-      <ReferenceManyField label="Products" target="order.id" reference="OrderLineItem">
+      <ArrayField label="Products" source="lineItems" reference="OrderLineItem">
         <Datagrid>
 
-          <ReferenceField label="Name" source="variant.id" reference="Variant">
-            <ReferenceField source="product.id" reference="Product">
-              <TextField source="name" />
-            </ReferenceField>
-          </ReferenceField>
+          <TextField label="Product" source="variant.product.name" />
 
-          <ReferenceField label="Price" source="variant.id" reference="Variant">
-            <NumberField
-              source="price"
-              options={{ style: "currency", currency: "EUR" }}
-            />
-          </ReferenceField>
+          <NumberField
+            label="Price"
+            source="variant.price"
+            options={{ style: "currency", currency: "EUR" }}
+          />
 
-          <ReferenceField label="Variants" source="variant.id" reference="Variant">
-            <ReferenceManyField target="variant.id" reference="SelectedOption">
-              <SingleFieldList>
-                <ReferenceField source="value.id" reference="OptionValue">
-                  <ChipField source="name"/>
-                </ReferenceField>
-              </SingleFieldList>
-            </ReferenceManyField>
-          </ReferenceField>
+          <ArrayField label="Values" source="variant.selectedOptions">
+            <SingleFieldList>
+              <ChipField source="value.name"/>
+            </SingleFieldList>
+          </ArrayField>
 
-          <ReferenceField label="Available" source="variant.id" reference="Variant">
-            <BooleanField source="available"/>
-          </ReferenceField>
+          <BooleanField label="Available" source="variant.available"/>
 
-          <TextField source="quantity" />
+          <TextField label="Quantity" source="quantity" />
         </Datagrid>
-      </ReferenceManyField>
+      </ArrayField>
       <NumberField
         source="totalPrice"
         options={{ style: "currency", currency: "EUR" }}
