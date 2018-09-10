@@ -50,11 +50,23 @@
   version "7.0.0-beta.51"
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.0.0-beta.51.tgz#27cec2df409df60af58270ed8f6aa55409ea86f6"
 
-"@babel/runtime@^7.0.0-beta.42":
-  version "7.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.0.0-beta.53.tgz#9df22ae34823ce89f790060594b83ee572e2c5d2"
+"@babel/runtime@7.0.0-beta.42":
+  version "7.0.0-beta.42"
+  resolved "http://registry.npmjs.org/@babel/runtime/-/runtime-7.0.0-beta.42.tgz#352e40c92e0460d3e82f49bd7e79f6cda76f919f"
   dependencies:
-    core-js "^2.5.7"
+    core-js "^2.5.3"
+    regenerator-runtime "^0.11.1"
+
+"@babel/runtime@7.0.0-beta.56":
+  version "7.0.0-beta.56"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.0.0-beta.56.tgz#cda612dffd5b1719a7b8e91e3040bd6ae64de8b0"
+  dependencies:
+    regenerator-runtime "^0.12.0"
+
+"@babel/runtime@7.0.0-rc.1":
+  version "7.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.0.0-rc.1.tgz#42f36fc5817911c89ea75da2b874054922967616"
+  dependencies:
     regenerator-runtime "^0.12.0"
 
 "@babel/template@7.0.0-beta.51":
@@ -89,11 +101,11 @@
     lodash "^4.17.5"
     to-fast-properties "^2.0.0"
 
-"@material-ui/core@^1.0.0":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-1.3.1.tgz#8b4e6db9ed4536e8ccbea0eeff3da0d524e6af2c"
+"@material-ui/core@^1.4.0":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-1.5.1.tgz#cb00cb934447ae688e08129f1dab55f54d29d87a"
   dependencies:
-    "@babel/runtime" "^7.0.0-beta.42"
+    "@babel/runtime" "7.0.0-rc.1"
     "@types/jss" "^9.5.3"
     "@types/react-transition-group" "^2.0.8"
     brcast "^3.0.1"
@@ -103,6 +115,7 @@
     deepmerge "^2.0.1"
     dom-helpers "^3.2.1"
     hoist-non-react-statics "^2.5.0"
+    is-plain-object "^2.0.4"
     jss "^9.3.3"
     jss-camel-case "^6.0.0"
     jss-default-unit "^8.0.2"
@@ -112,19 +125,57 @@
     jss-vendor-prefixer "^7.0.0"
     keycode "^2.1.9"
     normalize-scroll-left "^0.1.2"
+    popper.js "^1.14.1"
     prop-types "^15.6.0"
-    react-event-listener "^0.6.0"
+    react-event-listener "^0.6.2"
     react-jss "^8.1.0"
-    react-popper "^0.10.0"
     react-transition-group "^2.2.1"
-    recompose "^0.27.0"
-    scroll "^2.0.3"
+    recompose "^0.28.0"
+    warning "^4.0.1"
+
+"@material-ui/core@~1.4.0":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-1.4.3.tgz#e6bc29b441c07932cc64fffb02670792b119fb8e"
+  dependencies:
+    "@babel/runtime" "7.0.0-beta.42"
+    "@types/jss" "^9.5.3"
+    "@types/react-transition-group" "^2.0.8"
+    brcast "^3.0.1"
+    classnames "^2.2.5"
+    csstype "^2.5.2"
+    debounce "^1.1.0"
+    deepmerge "^2.0.1"
+    dom-helpers "^3.2.1"
+    hoist-non-react-statics "^2.5.0"
+    is-plain-object "^2.0.4"
+    jss "^9.3.3"
+    jss-camel-case "^6.0.0"
+    jss-default-unit "^8.0.2"
+    jss-global "^3.0.0"
+    jss-nested "^6.0.1"
+    jss-props-sort "^6.0.0"
+    jss-vendor-prefixer "^7.0.0"
+    keycode "^2.1.9"
+    normalize-scroll-left "^0.1.2"
+    popper.js "^1.14.1"
+    prop-types "^15.6.0"
+    react-event-listener "^0.6.2"
+    react-jss "^8.1.0"
+    react-transition-group "^2.2.1"
+    recompose "^0.28.0"
     warning "^4.0.1"
 
 "@material-ui/icons@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@material-ui/icons/-/icons-1.1.0.tgz#4d025df7b0ba6ace8d6710079ed76013a4d26595"
   dependencies:
+    recompose "^0.26.0 || ^0.27.0"
+
+"@material-ui/icons@~1.1.0":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@material-ui/icons/-/icons-1.1.1.tgz#f104d6a1ac4d3ff34a2bed74b066986b2a7054a5"
+  dependencies:
+    "@babel/runtime" "7.0.0-beta.42"
     recompose "^0.26.0 || ^0.27.0"
 
 "@types/async@2.0.49":
@@ -1927,7 +1978,7 @@ core-js@^1.0.0:
   version "1.2.7"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-1.2.7.tgz#652294c14651db28fa93bd2d5ff2983a4f08c636"
 
-core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.7:
+core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.3:
   version "2.5.7"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.7.tgz#f972608ff0cead68b841a16a932d0b183791814e"
 
@@ -2362,10 +2413,6 @@ dom-urls@^1.1.0:
   resolved "https://registry.yarnpkg.com/dom-urls/-/dom-urls-1.1.0.tgz#001ddf81628cd1e706125c7176f53ccec55d918e"
   dependencies:
     urijs "^1.16.1"
-
-dom-walk@^0.1.0:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/dom-walk/-/dom-walk-0.1.1.tgz#672226dc74c8f799ad35307df936aba11acd6018"
 
 domain-browser@^1.1.1:
   version "1.2.0"
@@ -3279,13 +3326,6 @@ global-prefix@^1.0.1:
     is-windows "^1.0.1"
     which "^1.2.14"
 
-global@~4.3.0:
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/global/-/global-4.3.2.tgz#e76989268a6c74c38908b1305b10fc0e394e9d0f"
-  dependencies:
-    min-document "^2.19.0"
-    process "~0.5.1"
-
 globals@^11.1.0:
   version "11.7.0"
   resolved "https://registry.yarnpkg.com/globals/-/globals-11.7.0.tgz#a583faa43055b1aca771914bf68258e2fc125673"
@@ -3477,7 +3517,7 @@ hmac-drbg@^1.0.0:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.1"
 
-hoist-non-react-statics@^2.3.0, hoist-non-react-statics@^2.3.1, hoist-non-react-statics@^2.5.0:
+hoist-non-react-statics@^2.3.0, hoist-non-react-statics@^2.3.1, hoist-non-react-statics@^2.5.0, hoist-non-react-statics@^2.5.4:
   version "2.5.5"
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-2.5.5.tgz#c5903cf409c0dfd908f388e619d86b9c1174cb47"
 
@@ -3733,7 +3773,7 @@ interpret@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.1.0.tgz#7ed1b1410c6a0e0f78cf95d3b8440c63f78b8614"
 
-invariant@^2.0.0, invariant@^2.2.0, invariant@^2.2.1, invariant@^2.2.2, invariant@^2.2.3, invariant@^2.2.4:
+invariant@^2.0.0, invariant@^2.2.0, invariant@^2.2.1, invariant@^2.2.2, invariant@^2.2.4:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.4.tgz#610f3c92c9359ce1db616e538008d23ff35158e6"
   dependencies:
@@ -4690,9 +4730,13 @@ locate-path@^2.0.0:
     p-locate "^2.0.0"
     path-exists "^3.0.0"
 
-lodash-es@^4.17.5, lodash-es@^4.2.1:
+lodash-es@^4.17.10, lodash-es@^4.17.5, lodash-es@^4.2.1:
   version "4.17.10"
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.10.tgz#62cd7104cdf5dd87f235a837f0ede0e8e5117e05"
+
+lodash._getnative@^3.0.0:
+  version "3.9.1"
+  resolved "https://registry.yarnpkg.com/lodash._getnative/-/lodash._getnative-3.9.1.tgz#570bc7dede46d61cdcde687d65d3eecbaa3aaff5"
 
 lodash._reinterpolate@~3.0.0:
   version "3.0.0"
@@ -4713,6 +4757,22 @@ lodash.debounce@^4.0.8:
 lodash.defaults@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/lodash.defaults/-/lodash.defaults-4.2.0.tgz#d09178716ffea4dde9e5fb7b37f6f0802274580c"
+
+lodash.isarguments@^3.0.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/lodash.isarguments/-/lodash.isarguments-3.1.0.tgz#2f573d85c6a24289ff00663b491c1d338ff3458a"
+
+lodash.isarray@^3.0.0:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/lodash.isarray/-/lodash.isarray-3.0.4.tgz#79e4eb88c36a8122af86f844aa9bcd851b5fbb55"
+
+lodash.keys@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/lodash.keys/-/lodash.keys-3.1.2.tgz#4dbc0472b156be50a0b286855d1bd0b0c656098a"
+  dependencies:
+    lodash._getnative "^3.0.0"
+    lodash.isarguments "^3.0.0"
+    lodash.isarray "^3.0.0"
 
 lodash.memoize@^4.1.2:
   version "4.1.2"
@@ -4800,6 +4860,13 @@ map-visit@^1.0.0:
   resolved "https://registry.yarnpkg.com/map-visit/-/map-visit-1.0.0.tgz#ecdca8f13144e660f1b5bd41f12f3479d98dfb8f"
   dependencies:
     object-visit "^1.0.0"
+
+material-ui-chip-input@^1.0.0-beta.6:
+  version "1.0.0-beta.7"
+  resolved "https://registry.yarnpkg.com/material-ui-chip-input/-/material-ui-chip-input-1.0.0-beta.7.tgz#6d9921028f9f1774ab7821ab5a9aa3c44cedb7b6"
+  dependencies:
+    classnames "^2.2.5"
+    prop-types "^15.6.1"
 
 math-expression-evaluator@^1.2.14:
   version "1.2.17"
@@ -4928,12 +4995,6 @@ mime@^1.4.1, mime@^1.5.0:
 mimic-fn@^1.0.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/mimic-fn/-/mimic-fn-1.2.0.tgz#820c86a39334640e99516928bd03fca88057d022"
-
-min-document@^2.19.0:
-  version "2.19.0"
-  resolved "https://registry.yarnpkg.com/min-document/-/min-document-2.19.0.tgz#7bd282e3f5842ed295bb748cdd9f1ffa2c824685"
-  dependencies:
-    dom-walk "^0.1.0"
 
 minimalistic-assert@^1.0.0, minimalistic-assert@^1.0.1:
   version "1.0.1"
@@ -5399,6 +5460,10 @@ package-json@^4.0.0:
 pako@~1.0.5:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.6.tgz#0101211baa70c4bca4a0f63f2206e97b7dfaf258"
+
+papaparse@^4.1.4:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/papaparse/-/papaparse-4.6.0.tgz#4e3b8d6bf9f7900da437912794ec292207526867"
 
 param-case@2.1.x:
   version "2.1.1"
@@ -5907,10 +5972,6 @@ process@^0.11.10:
   version "0.11.10"
   resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
 
-process@~0.5.1:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/process/-/process-0.5.2.tgz#1638d8a8e34c2f440a91db95ab9aeb677fc185cf"
-
 progress@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.0.tgz#8a1be366bf8fc23db2bd23f10c6fe920b4389d1f"
@@ -6014,9 +6075,9 @@ querystringify@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.0.0.tgz#fa3ed6e68eb15159457c89b37bc6472833195755"
 
-ra-core@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-2.1.0.tgz#b81d9a98727c8fc28f6165178f299a018e76f08b"
+ra-core@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/ra-core/-/ra-core-2.3.0.tgz#6ffde6bcbd4890607895bdbbbde3766f62238e2d"
   dependencies:
     babel-runtime "~6.26.0"
     classnames "~2.2.5"
@@ -6025,21 +6086,21 @@ ra-core@^2.1.0:
     node-polyglot "2.2.2"
     prop-types "~15.6.1"
     query-string "~5.1.1"
-    ra-language-english "^2.0.2"
+    ra-language-english "^2.3.0"
     react-redux "~5.0.7"
     react-router "~4.2.0"
     react-router-dom "~4.2.2"
     react-router-redux "~5.0.0-alpha.9"
     recompose "~0.26.0"
     redux "~3.7.2"
-    redux-form "~7.3.0"
+    redux-form "~7.4.0"
     redux-saga "~0.16.0"
     reselect "~3.0.0"
     warning "~3.0.0"
 
-ra-data-graphql@^2.0.3:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/ra-data-graphql/-/ra-data-graphql-2.1.1.tgz#422e64314fb9ff7ef7120adfe609fe24a4cef356"
+ra-data-graphql@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/ra-data-graphql/-/ra-data-graphql-2.3.0.tgz#49cdad50bd6d98fd1ffe34aa196a3846ba424591"
   dependencies:
     apollo-client "^2.2.8"
     apollo-client-preset "^1.0.6"
@@ -6047,42 +6108,39 @@ ra-data-graphql@^2.0.3:
     lodash "~4.17.5"
     pluralize "~7.0.0"
 
-ra-language-english@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-2.0.2.tgz#121bd8c358af7f74dc7a8bff4f4860aaec150a3b"
+ra-language-english@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-2.3.0.tgz#d25247bd148a57b02ff0480a66388220ee72ef16"
 
-ra-ui-materialui@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-2.1.1.tgz#28e2a03223fa4ae903b4e55870c6186ded19f3d9"
+ra-ui-materialui@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/ra-ui-materialui/-/ra-ui-materialui-2.3.0.tgz#39f10c86c1f1cc263a9824b0b0f0475ea3eba44b"
   dependencies:
-    "@material-ui/core" "^1.0.0"
+    "@material-ui/core" "^1.4.0"
     "@material-ui/icons" "^1.0.0"
     autosuggest-highlight "^3.1.1"
     classnames "~2.2.5"
     inflection "~1.12.0"
     lodash "~4.17.5"
+    material-ui-chip-input "^1.0.0-beta.6"
+    papaparse "^4.1.4"
     prop-types "~15.6.1"
-    ra-core "^2.1.0"
+    ra-core "^2.3.0"
     react-autosuggest "^9.3.2"
     react-dropzone "~4.0.1"
+    react-headroom "^2.2.2"
     react-redux "~5.0.7"
     react-router-dom "~4.2.2"
     react-transition-group "^2.2.1"
     recompose "~0.26.0"
     redux "~3.7.2"
-    redux-form "~7.3.0"
+    redux-form "~7.4.0"
 
-raf@3.4.0:
+raf@3.4.0, raf@^3.3.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/raf/-/raf-3.4.0.tgz#a28876881b4bc2ca9117d4138163ddb80f781575"
   dependencies:
     performance-now "^2.1.0"
-
-rafl@~1.2.1:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/rafl/-/rafl-1.2.2.tgz#fe930f758211020d47e38815f5196a8be4150740"
-  dependencies:
-    global "~4.3.0"
 
 randomatic@^3.0.0:
   version "3.0.0"
@@ -6127,13 +6185,13 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-admin@^2.0.3:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-2.1.1.tgz#e0f45c41f9322ce6b44ce48c5b17c84e66d5bf48"
+react-admin@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-2.3.0.tgz#1b612b639d5192c5cbe646132df1659b39205b0b"
   dependencies:
-    ra-core "^2.1.0"
-    ra-language-english "^2.0.2"
-    ra-ui-materialui "^2.1.1"
+    ra-core "^2.3.0"
+    ra-language-english "^2.3.0"
+    ra-ui-materialui "^2.3.0"
 
 react-autosuggest@^9.3.2:
   version "9.3.4"
@@ -6194,13 +6252,21 @@ react-error-overlay@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-4.0.0.tgz#d198408a85b4070937a98667f500c832f86bd5d4"
 
-react-event-listener@^0.6.0:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/react-event-listener/-/react-event-listener-0.6.1.tgz#41c7a80a66b398c27dd511e22712b02f3d4eccca"
+react-event-listener@^0.6.2:
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/react-event-listener/-/react-event-listener-0.6.3.tgz#8eab88129a76e095ed8aa684c29679eded1e843d"
   dependencies:
-    "@babel/runtime" "^7.0.0-beta.42"
+    "@babel/runtime" "7.0.0-rc.1"
     prop-types "^15.6.0"
     warning "^4.0.1"
+
+react-headroom@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/react-headroom/-/react-headroom-2.2.2.tgz#5ddea3bc87cd54be38f6f98c3fde4527e2a5fb0f"
+  dependencies:
+    prop-types "^15.5.8"
+    raf "^3.3.0"
+    shallowequal "^0.2.2"
 
 react-jss@^8.1.0:
   version "8.6.1"
@@ -6215,13 +6281,6 @@ react-jss@^8.1.0:
 react-lifecycles-compat@^3.0.2, react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
-
-react-popper@^0.10.0:
-  version "0.10.4"
-  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-0.10.4.tgz#af2a415ea22291edd504678d7afda8a6ee3295aa"
-  dependencies:
-    popper.js "^1.14.1"
-    prop-types "^15.6.1"
 
 react-redux@~5.0.7:
   version "5.0.7"
@@ -6421,11 +6480,22 @@ readdirp@^2.0.0:
     readable-stream "^2.0.2"
     set-immediate-shim "^1.0.1"
 
-"recompose@^0.26.0 || ^0.27.0", recompose@^0.27.0:
+"recompose@^0.26.0 || ^0.27.0":
   version "0.27.1"
   resolved "https://registry.yarnpkg.com/recompose/-/recompose-0.27.1.tgz#1a49e931f183634516633bbb4f4edbfd3f38a7ba"
   dependencies:
     babel-runtime "^6.26.0"
+    change-emitter "^0.1.2"
+    fbjs "^0.8.1"
+    hoist-non-react-statics "^2.3.1"
+    react-lifecycles-compat "^3.0.2"
+    symbol-observable "^1.0.4"
+
+recompose@^0.28.0:
+  version "0.28.2"
+  resolved "https://registry.yarnpkg.com/recompose/-/recompose-0.28.2.tgz#19e679227bdf979e0d31b73ffe7ae38c9194f4a7"
+  dependencies:
+    "@babel/runtime" "7.0.0-beta.56"
     change-emitter "^0.1.2"
     fbjs "^0.8.1"
     hoist-non-react-statics "^2.3.1"
@@ -6468,18 +6538,18 @@ reduce-function-call@^1.0.1:
   dependencies:
     balanced-match "^0.4.2"
 
-redux-form@~7.3.0:
-  version "7.3.0"
-  resolved "https://registry.yarnpkg.com/redux-form/-/redux-form-7.3.0.tgz#b92ef1639c86a6009b0821aacfc80ad8b5ac8c05"
+redux-form@~7.4.0:
+  version "7.4.2"
+  resolved "https://registry.yarnpkg.com/redux-form/-/redux-form-7.4.2.tgz#d6061088fb682eb9fc5fb9749bd8b102f03154b0"
   dependencies:
-    deep-equal "^1.0.1"
     es6-error "^4.1.1"
-    hoist-non-react-statics "^2.5.0"
-    invariant "^2.2.3"
+    hoist-non-react-statics "^2.5.4"
+    invariant "^2.2.4"
     is-promise "^2.1.0"
-    lodash "^4.17.5"
-    lodash-es "^4.17.5"
+    lodash "^4.17.10"
+    lodash-es "^4.17.10"
     prop-types "^15.6.1"
+    react-lifecycles-compat "^3.0.4"
 
 redux-saga@~0.16.0:
   version "0.16.0"
@@ -6498,7 +6568,7 @@ regenerate@^1.2.1:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/regenerate/-/regenerate-1.4.0.tgz#4a856ec4b56e4077c557589cae85e7a4c8869a11"
 
-regenerator-runtime@^0.11.0:
+regenerator-runtime@^0.11.0, regenerator-runtime@^0.11.1:
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.11.1.tgz#be05ad7f9bf7d22e056f9726cee5017fbf19e2e9"
 
@@ -6781,12 +6851,6 @@ schema-utils@^0.3.0:
   dependencies:
     ajv "^5.0.0"
 
-scroll@^2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/scroll/-/scroll-2.0.3.tgz#0951b785544205fd17753bc3d294738ba16fc2ab"
-  dependencies:
-    rafl "~1.2.1"
-
 section-iterator@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/section-iterator/-/section-iterator-2.0.0.tgz#bf444d7afeeb94ad43c39ad2fb26151627ccba2a"
@@ -6902,6 +6966,12 @@ sha.js@^2.4.0, sha.js@^2.4.8:
 shallow-equal@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/shallow-equal/-/shallow-equal-1.0.0.tgz#508d1838b3de590ab8757b011b25e430900945f7"
+
+shallowequal@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/shallowequal/-/shallowequal-0.2.2.tgz#1e32fd5bcab6ad688a4812cb0cc04efc75c7014e"
+  dependencies:
+    lodash.keys "^3.1.2"
 
 shebang-command@^1.2.0:
   version "1.2.0"

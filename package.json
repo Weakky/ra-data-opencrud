@@ -10,19 +10,19 @@
     "graphql-tag": "^2.6.1",
     "lodash": "~4.17.5",
     "pluralize": "~7.0.0",
-    "ra-data-graphql": "^2.0.3",
+    "ra-data-graphql": "^2.3.0",
     "react": "^16.4.1",
-    "react-admin": "^2.0.3",
+    "react-admin": "^2.3.0",
     "react-dom": "^16.4.1",
     "react-scripts": "1.1.4"
   },
   "peerDependencies": {
     "graphql": "^0.13.2",
-    "react-admin": "^2.0.3"
+    "react-admin": "^2.3.0"
   },
   "devDependencies": {
     "graphql": "^0.13.2",
-    "react-admin": "^2.0.3"
+    "react-admin": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts start",
