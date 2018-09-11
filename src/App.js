@@ -20,7 +20,7 @@ import { OptionCreate, OptionEdit, OptionList, OptionShow } from './components/o
 
 import './App.css';
 
-const decoratedBuildQuery = (buildQuery) => (introspectionResults) => (fetchType, resourceName, params) => {
+const enhanceBuildQuery = (buildQuery) => (introspectionResults) => (fetchType, resourceName, params) => {
   const fragment = get(overridenQueries, `${resourceName}.${fetchType}`);
 
   return buildQuery(introspectionResults)(fetchType, resourceName, params, fragment);
@@ -36,7 +36,7 @@ class App extends Component {
   componentDidMount() {
     buildPrismaProvider({
       clientOptions: { uri: 'https://eu1.prisma.sh/flavian/ra-data-prisma/dev' },
-      buildQuery: decoratedBuildQuery(buildQuery)
+      buildQuery: enhanceBuildQuery(buildQuery)
     }).then(dataProvider => this.setState({ dataProvider }));
   }
 
