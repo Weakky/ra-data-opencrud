@@ -126,10 +126,6 @@ const buildReferenceField = ({ inputArg, introspectionResults, typeName, field, 
 
 const buildUpdateVariables = introspectionResults => (resource, aorFetchType, params) => {
   return Object.keys(params.data).reduce((acc, key) => {
-    if (!params.data[key]) {
-      return acc;
-    }
-
     if (Array.isArray(params.data[key])) {
       const inputType = findInputFieldForType(
         introspectionResults,
@@ -143,7 +139,7 @@ const buildUpdateVariables = introspectionResults => (resource, aorFetchType, pa
 
       //TODO: Make connect, disconnect and update overridable
       //TODO: Make updates working
-      const { fieldsToAdd, fieldsToRemove, fieldsToUpdate } = computeFieldsToAddRemoveUpdate(
+      const { fieldsToAdd, fieldsToRemove, /* fieldsToUpdate */} = computeFieldsToAddRemoveUpdate(
         params.previousData[`${key}Ids`],
         params.data[`${key}Ids`]
       );
@@ -229,7 +225,7 @@ const buildCreateVariables = introspectionResults => (resource, aorFetchType, pa
       const fieldsToConnect = buildReferenceField({
         inputArg: params.data[key],
         introspectionResults,
-        typeName: `${resource.type.name}UpdateInput`,
+        typeName: `${resource.type.name}CreateInput`,
         field: key,
         mutationType: PRISMA_CONNECT
       });
