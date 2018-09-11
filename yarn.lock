@@ -5936,7 +5936,7 @@ ra-core@^2.3.0:
     reselect "~3.0.0"
     warning "~3.0.0"
 
-ra-data-graphql@^2.3.0:
+ra-data-graphql@^2.0.3:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/ra-data-graphql/-/ra-data-graphql-2.3.0.tgz#49cdad50bd6d98fd1ffe34aa196a3846ba424591"
   dependencies:
@@ -6023,7 +6023,7 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-admin@^2.3.0:
+react-admin@^2.0.3:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/react-admin/-/react-admin-2.3.0.tgz#1b612b639d5192c5cbe646132df1659b39205b0b"
   dependencies:
