@@ -225,11 +225,25 @@ As overriding all queries can be cumbersome, **this should be done progressively
 
 ## Contributing
 
-Run the tests with this command:
+Use the example under `examples/prisma-ecommerce` as a playground for improving `ra-data-opencrud`.
+
+To easily enhance `ra-data-opencrud` and get the changes reflected on `examples/prisma-ecommerce`, do the following:
+
+- `cd ra-data-opencrud`
+- `yarn link`
+- `cd examples/prisma-ecommerce`
+- `yarn link ra-data-opencrud`
+
+Once this is done, the `ra-data-opencrud` dependency will be replaced by the one on the repository.
+**One last thing, don't forget to transpile the library with babel by running the following command on the root folder**
+
+
+```sh
+yarn watch
+```
+
+You should now be good to go ! Run the tests with this command:
 
 ```sh
 jest
 ```
-
-
-
