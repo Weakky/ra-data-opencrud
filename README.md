@@ -1,6 +1,6 @@
 # ra-data-opencrud
 
-*Prisma on steroids*: easily build backoffices with Prisma/GraphCMS plugged on `react-admin!
+*Prisma on steroids*: easily build backoffices with Prisma/GraphCMS plugged on `react-admin`!
 
 ### Work in progress
 If you wanna give it a try anyway, here's a quick preview on codesandbox.
