@@ -1,19 +1,9 @@
-# ra-data-prisma
+# ra-data-opencrud
 
-*Prisma on steroids with react-admin*: build backoffices with prisma plugged on react-admin!
-
-Other WIP adaptators:</br>
-https://github.com/moritzmorgenroth/ra-data-prisma
+*Prisma on steroids*: easily build backoffices with Prisma/GraphCMS plugged on `react-admin!
 
 ### Work in progress
-
-#### This adaptator is currently under active development.
-I am using [prisma-ecommerce's](https://github.com/Weakky/prisma-ecommerce/) prisma API to easily test the data provider, hence the react app present on the repository.
-Once the data provider will be stable enough, I'll remove every trace of react, and let it be a standalone react-admin data provider as it should be.
-The react-app will be extracted from that repo to replace the current backoffice used in [prisma-ecommerce](https://github.com/Weakky/prisma-ecommerce/).
-
-### Try on codesandbox
- If you wanna give it a try anyway, here's a quick preview on codesandbox.
+If you wanna give it a try anyway, here's a quick preview on codesandbox.
 The API is hosted on Prisma's public servers, which means the API is limited to 10 API calls per seconds.
 Be aware that it might not be working because of that, or that performances may be poor.
 
@@ -21,143 +11,225 @@ Be aware that it might not be working because of that, or that performances may 
 
 # Summary
 
-1. Context
-2. React-admin ?
-3. How (GraphQL) adaptators are working?
-4. Challenges limitations with Prisma
-5. Performance concerns
+- [What is react admin ? And what's that ?](#what-is-react-admin-?-and-what's-ra-data-opencrud-?)
+- [Installation](#installation)
+- [Usage](#installation)
+- [Options](#options)
+- [Tips and workflow](#tips-and-workflow)
 
+## What is react admin ? And what's ra-data-opencrud ?
 
-## 1. Context
+[Find out more about the benefits of using `react-admin` with Prisma here.](context.md) 
 
-As powerful as prisma can be, building backoffices can be painful mostly due to the redundancy of the tasks.
+## Installation
 
-As Prisma architecture suggest, it should be put behind a handcrafted GraphQL server, and be used as a bridge between the database and the actual API that will eventually be consumed. This implies that most of the CRUD mutations will inevitably have to be **duplicated**.
+Install with:
 
-On top of that, these duplicated resolvers will need additional logic to compute which fields needs to be disconnected, which needs to be connect, created, or updated, which kill all the benefits from having an auto-generated CRUD GraphQL API.
-
-There may be one solution though: As Prisma builds **a generic GraphQL API following conventions**, it means there's a door for **automation**.
-If we used Prisma *directly* to handle all those redundant CRUD tasks, and made use of the conventions followed by Prisma, maybe we could automate the whole process.
-
-## 2. React-admin?
-
-*A powerful library to build backoffices on top of any backend*
-
-As the github package says, `react-admin` is "A frontend Framework for building admin applications running in the browser on top of REST/GraphQL APIs, using ES6, React and Material Design".
-
-`react-admin` uses an adaptator approach, making it theoretically working with any kind of API that follows a predictable convention (which is the case of Prisma).
-
-`react-admin` speaks a dialect that abstract most CRUD operations (`CREATE`, `UPDATE`, `GET_MANY`, `GET_ONE`, `GET_LIST` etc...). It is then the responsability of the adaptator to convert this dialect into requests that can be understood by our backend. Below is an example following *GraphCool's* grammar.
-
-![](https://camo.githubusercontent.com/a58fc16d347122afd015c06a96591c5ecc1bed62/68747470733a2f2f696d6775722e636f6d2f4d6f496e665a4d2e706e67)
-
-
-In fact, there's [already an adaptator](https://github.com/marmelab/react-admin/tree/master/packages/ra-data-graphcool) working with *GraphCool's* conventions. The only remaining job is to update this adaptator to follow *Prisma*'s conventions.
-
-## 3. How (GraphQL) adaptators are working?
-
-Most GraphQL adaptators are based on [a low level adaptator called ra-data-graphql](https://github.com/marmelab/react-admin/tree/master/packages/ra-data-graphql) made by `react-admin` creators.
-
-In a nutshell, its job is to run an introspection query on your GraphQL api, pass it to *your* adaptator along with the type of query that is made (`CREATE`, `UPDATE`, `GET_MANY`, `GET_ONE`, `GET_LIST`, `DELETE` etc...).
-
-It is then the job of the *prisma adaptator* to build the GraphQL query that matches *Prisma's* conventions, and to provide a function that will parse the response of that query in a way that `react-admin` can understand.
-
-Once the query and the function is passed back to `ra-data-graphql`, the actual HTTP requests is sent (using ApolloClient) to your GraphQL API, then the response is parsed with the provided function and that parsed response is given to `ra-core`, the core of react-admin. *That's it.*
-
-`ra-core` => `ra-data-graphql` => `ra-data-prisma` => `ra-data-graphql` => `ra-core`.
-
-## 4. Challenges and limitations with Prisma
-
-As querying data with Prisma is as straightforward as with any other GraphQL API, there won't be big challenges here.
-When relevant, `react-admin` passes some parameters to the adaptator (pagination, sorting, and filtering). As Prisma already handles pagination, sorting and filtering, converting them to Prisma types should be easy.
-`react-admin` also expects a `total` field when fetching several items to properly handle pagination. Prisma is also able to provide that data using `<Type>Connection` fields.
-
-### Challenges will mostly be on the Create/Update part
-
-But that's where all the redundancy explained above will be done once and for all.
-
-Thanksfully, when *updating* a resource, `react-admin` not only provides to the adaptator the updated data, but also the **previous data**. This will allow to compute fields that will have to be **created** / **connected** / **disconnected** / **updated** / **deleted** (by processing a diff [like I've done here](https://github.com/Weakky/prisma-ecommerce/blob/master/prisma/src/resolvers/Mutation/option.ts#L9-L24) for example).
-
-One drawback is that we will have to make **an opiniated choice** as how **updates** and **creations** treats references.
-
-Here is my proposal regarding this default behavior:
-
-`CREATE`: When creating a resource, references should only be **connected**.</br>
-`UPDATE`: When updating a resource, references should only be **connected**/**disconnected**/**updated** using the computations shown on the link above.
-
-### Quick explanation regarding the diff to compute nodes to connect/disconnect/update:
-
-Given `data` (the updated data) and `previousData` (the data before the updates)
-
-Nodes to `connect` are: Nodes ids that are in `data` but not in `previousData`</br>
-Nodes to `disconnect` are: Nodes ids that are no longer in `data` but in `previousData`</br>
-Nodes to `update` are: Nodes ids that are both present in `data` and `previousData`.</br>
-Note: If the nodes to update haven't changed, we could still put them in an `update` object to let it be idem-potent.
-
-
-### A way to override this behavior will be necessary.
-
-We might want for example to `create`/`delete` instead of `connect`/`disconnect`.
-Here's a data-structure that could describe our needs, configurable by `resource` and by `fields` of that resource.
-
-```js
-// exported from prisma adaptator
-// Prisma mutation types
-export const CONNECT = 'connect';
-export const DISCONNECT = 'disconnect';
-export const CREATE = 'create';
-export const DELETE = 'delete';
-export const UPDATE = 'update';
-
-// Mutation "actions"
-export const NEW = 'new';
-export const REMOVED = 'removed';
-export const UPDATED = 'updated';
-
-// What mutations options would look like according to the default behavior described above
-const defaultMutationOptions = {  
-  resourceName: {  
-    field1: {  
-      UPDATE: {  
-        [NEW]: CONNECT,        //Connect the node when added 
-	    [REMOVED]: DISCONNECT, //Disconnect the node when removed
-	    [UPDATED]: UPDATE      //Update the node
-      },  
-	  CREATE: {  
-        [NEW]: CONNECT
-      }  
-    },
-    field2: { ... },
-  },
-  resourceName2: { ... }
-};
-
-buildPrismaDataProvider({
-  clientOptions: { uri: 'localhost' },
-  introspectionOptions: { ... },
-  // overidden mutationOptions
-  mutationOptions: {  
-  Product: {  
-    prices: {  
-      UPDATE: {  
-        [NEW]: CREATE,     //Create the node when added  
-	    [REMOVED]: DELETE, //Delete the node when added
-	    [UPDATED]: UPDATE  //Update the node  
-      },  
-	  CREATE: {  
-        [NEW]: CONNECT  
-      }  
-    },  
-  }  
-}
-});
+```sh
+npm install --save graphql ra-data-opencrud
 ```
 
-## 5. Performance concerns
+or
 
-In most cases, `react-admin` is smart and optimized enough to restitute data quickly. However, when trying to query deeply nested data, the number of queries grows quite fast, taking quite a long time to get back all the data.
+```sh
+yarn add graphql ra-data-opencrud
+```
 
-One way `react-admin` creators workarounded that is by [overriding some queries](https://github.com/marmelab/react-admin/blob/master/examples/graphcool-demo/src/dataProvider.js) to grab the deeply nested data without making several queries.
+## Usage
+
+This example assumes a `Post` type is defined in your datamodel.
+
+```js
+// in App.js
+import React, { Component } from 'react';
+import buildOpenCrudProvider from 'ra-data-opencrud';
+import { Admin, Resource, Delete } from 'react-admin';
+
+import { PostCreate, PostEdit, PostList } from './posts';
+
+const client = new ApolloClient();
+
+class App extends Component {
+    constructor() {
+        super();
+        this.state = { dataProvider: null };
+    }
+    componentDidMount() {
+        buildOpenCrudProvider({ clientOptions: { uri: 'your_prisma_or_graphcms_endpoint' }})
+            .then(dataProvider => this.setState({ dataProvider }));
+    }
+
+    render() {
+        const { dataProvider } = this.state;
+
+        if (!dataProvider) {
+            return <div>Loading</div>;
+        }
+
+        return (
+            <Admin dataProvider={dataProvider}>
+                <Resource name="Post" list={PostList} edit={PostEdit} create={PostCreate} remove={Delete} />
+            </Admin>
+        );
+    }
+}
+
+export default App;
+```
+
+And that's it, `buildOpenCrudProvider` will create a default ApolloClient for you and run an [introspection](http://graphql.org/learn/introspection/) query on your Prisma/GraphCMS endpoint, listing all potential resources.
+
+## Options
+
+### Customize the Apollo client
+
+You can either supply the client options by calling `buildOpenCrudProvider` like this:
+
+```js
+buildOpenCrudProvider({ clientOptions: { uri: 'your_prisma_or_graphcms_endpoint', ...otherApolloOptions } });
+```
+
+Or supply your client directly with:
+
+```js
+buildOpenCrudProvider({ client: myClient });
+```
+
+### Overriding a specific query
+
+The default behavior might not be optimized especially when dealing with references. You can override a specific query by decorating the `buildQuery` function:
+
+#### With a whole query
+
+```js
+// in src/dataProvider.js
+import buildOpenCrudProvider, { buildQuery } from 'ra-data-opencrud';
+
+const enhanceBuildQuery = introspection => (fetchType, resource, params) => {
+    const builtQuery = buildQuery(introspection)(fetchType, resource, params);
+
+    if (resource === 'Command' && fetchType === 'GET_ONE') {
+        return {
+            // Use the default query variables and parseResponse
+            ...builtQuery,
+            // Override the query
+            query: gql`
+                query Command($id: ID!) {
+                    data: Command(id: $id) {
+                        id
+                        reference
+                        customer {
+                            id
+                            firstName
+                            lastName
+                        }
+                    }
+                }`,
+        };
+    }
+
+    return builtQuery;
+}
+
+export default buildOpenCrudProvider({ buildQuery: enhanceBuildQuery })
+```
+
+#### Or using fragments
+
+You can also override a query using the same API `graphql-binding` offers.
+
+`buildQuery` accept a fourth parameter which is a fragment that will be used as the final query.
+
+```js
+// in src/dataProvider.js
+import buildOpenCrudProvider, { buildQuery } from 'ra-data-opencrud';
+
+const enhanceBuildQuery = introspection => (fetchType, resource, params) => {
+    if (resource === 'Command' && fetchType === 'GET_ONE') {
+        // If you need auto-completion from your IDE, you can also use gql and provide a valid fragment
+        return buildQuery(introspection)(fetchType, resource, params, `{
+            id
+            reference
+            customer { id firstName lastName }
+        }`);
+    }
+
+    return buildQuery(introspection)(fetchType, resource, params);
+}
+
+export default buildOpenCrudProvider({ buildQuery: enhanceBuildQuery })
+```
+
+As this approach can become really cumbersome, you can find a more elegant way to pass fragments in the example under `/examples/prisma-ecommerce` 
+
+### Customize the introspection
+
+These are the default options for introspection:
+
+```js
+const introspectionOptions = {
+    include: [], // Either an array of types to include or a function which will be called for every type discovered through introspection
+    exclude: [], // Either an array of types to exclude or a function which will be called for every type discovered through introspection
+}
+
+// Including types
+const introspectionOptions = {
+    include: ['Post', 'Comment'],
+};
+
+// Excluding types
+const introspectionOptions = {
+    exclude: ['CommandItem'],
+};
+
+// Including types with a function
+const introspectionOptions = {
+    include: type => ['Post', 'Comment'].includes(type.name),
+};
+
+// Including types with a function
+const introspectionOptions = {
+    exclude: type => !['Post', 'Comment'].includes(type.name),
+};
+```
+
+**Note**: `exclude` and `include` are mutualy exclusives and `include` will take precendance.
+
+**Note**: When using functions, the `type` argument will be a type returned by the introspection query. Refer to the [introspection](http://graphql.org/learn/introspection/) documentation for more information.
+
+Pass the introspection options to the `buildApolloProvider` function:
+
+```js
+buildApolloProvider({ introspection: introspectionOptions });
+```
+
+## Tips and workflow
+
+### Performance issues
+As react-admin was originally made for REST endpoints, it cannot always take full advantage of GraphQL's benefits.
+
+Although `react-admin` already has a load of bult-in optimizations ([Read more here](marmelab.com/blog/2016/10/18/using-redux-saga-to-deduplicate-and-group-actions.html) and [here](https://github.com/marmelab/react-admin/issues/2243)),
+it is not yet well suited when fetching n-to-many relations (multiple requests will be sent).
+
+To counter that limitation, as shown above, you can override queries to directly provide all the fields that you will need to display your view.
+
+#### Suggested workflow
+
+As overriding all queries can be cumbersome, **this should be done progressively**.
+
+- Start by using `react-admin` the way you're supposed to (using `<ReferenceField />` and `<ReferenceManyField />` when trying to access references)
+- Detect the hot-spots
+- Override the queries on those hot-spots by providing all the fields necessary (as [shown above](#or-using-fragments))
+- Replace the `<ReferenceField />` by simple fields (such as `<TextField />`) by accessing the resource in the following way: `<TextField source="product.name" />`
+- Replace the `<ReferenceManyField />` by `<ArrayField />` using the same technique as above
+
+## Contributing
+
+Run the tests with this command:
+
+```sh
+jest
+```
 
 
 

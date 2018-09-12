@@ -2,21 +2,21 @@ import React, { Component } from 'react';
 import { Admin, Resource, GET_LIST } from 'react-admin';
 import get from 'lodash/get';
 
-import buildPrismaProvider, { buildQuery } from './adaptator';
-import overridenQueries from './queries';
+import buildPrismaProvider, { buildQuery } from 'ra-data-opencrud';
+import overridenQueries from './queries/index';
 
-import { ProductEdit, ProductList } from './components/products';
-import { ShopEdit, ShopList } from './components/shops';
-import { OrderList } from './components/orders';
-import { CategoryCreate, CategoryEdit, CategoryList, CategoryShow } from './components/categories';
-import { BrandCreate, BrandEdit, BrandList, BrandShow } from './components/brands';
+import { ProductEdit, ProductList } from './components/products/index';
+import { ShopEdit, ShopList } from './components/shops/index';
+import { OrderList } from './components/orders/index';
+import { CategoryCreate, CategoryEdit, CategoryList, CategoryShow } from './components/categories/index';
+import { BrandCreate, BrandEdit, BrandList, BrandShow } from './components/brands/index';
 import {
   AttributeCreate,
   AttributeEdit,
   AttributeList,
   AttributeShow
-} from './components/attributes';
-import { OptionCreate, OptionEdit, OptionList, OptionShow } from './components/options';
+} from './components/attributes/index';
+import { OptionCreate, OptionEdit, OptionList, OptionShow } from './components/options/index';
 
 import './App.css';
 
