@@ -16,6 +16,7 @@ Be aware that it might not be working because of that, or that performances may 
 - [Usage](#installation)
 - [Options](#options)
 - [Tips and workflow](#tips-and-workflow)
+- [Contributing](#contributing)
 
 ## What is react admin ? And what's ra-data-opencrud ?
 
