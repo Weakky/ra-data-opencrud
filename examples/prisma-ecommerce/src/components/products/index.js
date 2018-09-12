@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Edit,
   List,
@@ -19,25 +20,31 @@ import {
   ReferenceArrayInput,
   SelectArrayInput,
   SelectInput,
-  ArrayInput,
-  SimpleFormIterator,
-  ArrayField
-} from "react-admin";
-import React from 'react'
+  ArrayField,
+} from 'react-admin';
+import { BrandLinkField, CategoryLinkField, ShopLinkField } from '../refFields';
 
 export const ProductFilter = props => (
   <Filter {...props}>
     <TextInput label="Search by name" source="name_contains" alwaysOn />
     <ReferenceInput label="Shop" source="shop.id" reference="Shop" alwaysOn>
-      <SelectInput optionText="name"/>
+      <SelectInput optionText="name" />
     </ReferenceInput>
     <ReferenceArrayInput label="Brands" source="brand" reference="Brand">
       <SelectArrayInput optionText="name" />
     </ReferenceArrayInput>
-    <ReferenceArrayInput label="Attributes" source="attributes_some" reference="Attribute">
+    <ReferenceArrayInput
+      label="Attributes"
+      source="attributes_some"
+      reference="Attribute"
+    >
       <SelectArrayInput optionText="value" />
     </ReferenceArrayInput>
-    <ReferenceArrayInput label="Options" source="options_some" reference="Option">
+    <ReferenceArrayInput
+      label="Options"
+      source="options_some"
+      reference="Option"
+    >
       <SelectArrayInput optionText="name" />
     </ReferenceArrayInput>
   </Filter>
@@ -46,18 +53,18 @@ export const ProductFilter = props => (
 export const ProductList = props => (
   <List filters={<ProductFilter />} {...props}>
     <Datagrid>
-      <TextField source="id"/>
-      <TextField source="name"/>
-      <TextField label="Brand" source="brand.name" />
-      <ArrayField label="Attributes" source="attributes" reference="Attribute">
+      <TextField source="id" />
+      <TextField source="name" />
+      <BrandLinkField label="Brand" source="brand.name" />
+      <ArrayField label="Attributes" source="attributes">
         <SingleFieldList>
-          <ChipField source="value"/>
+          <ChipField source="value" />
         </SingleFieldList>
       </ArrayField>
-      <TextField label="Category" source="category.name" />
-      <TextField label="Shop" source="shop.name" />
-      <EditButton/>
-      <ShowButton/>
+      <CategoryLinkField label="Category" source="category.name" />
+      <ShopLinkField label="Shop" source="shop.name" />
+      <EditButton />
+      <ShowButton />
     </Datagrid>
   </List>
 );
@@ -69,28 +76,20 @@ export const ProductEdit = props => (
       <TextInput source="name" />
       <TextInput source="description" />
       <ReferenceInput source="category.id" reference="Category">
-        <SelectInput optionText="name"/>
+        <SelectInput optionText="name" />
       </ReferenceInput>
       <ReferenceInput source="brand.id" reference="Brand">
-        <SelectInput optionText="name"/>
+        <SelectInput optionText="name" />
       </ReferenceInput>
-      <ReferenceArrayInput label="Options" source="optionsIds" reference="Option">
-        <SelectArrayInput optionText="name"/>
+      <ReferenceArrayInput
+        label="Options"
+        source="optionsIds"
+        reference="Option"
+      >
+        <SelectArrayInput optionText="name" />
       </ReferenceArrayInput>
     </SimpleForm>
   </Edit>
-);
-
-export const ProductShow = props => (
-  <Show title="Show a product" {...props}>
-    <DisabledInput source="id" />
-    <TextInput source="name" />
-    <ReferenceManyField label="Options" target="author.id" reference="Comment">
-      <SingleFieldList>
-        <ChipField source="content" />
-      </SingleFieldList>
-    </ReferenceManyField>
-  </Show>
 );
 
 export const ProductCreate = props => (

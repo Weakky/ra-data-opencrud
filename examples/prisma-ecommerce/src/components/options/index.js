@@ -40,7 +40,7 @@ export const OptionList = props => (
     <Datagrid>
       <TextField source="id" />
       <TextField source="name" />
-      <ArrayField label="Values" source="values" reference="OptionValue">
+      <ArrayField label="Values" source="values">
         <SingleFieldList>
           <ChipField source="name" />
         </SingleFieldList>

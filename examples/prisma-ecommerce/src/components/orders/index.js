@@ -19,6 +19,7 @@ import {
   ArrayField
 } from 'react-admin';
 import React from "react";
+import { ProductLinkField } from '../refFields';
 
 export const OrderFilter = props => (
   <Filter {...props}>
@@ -33,10 +34,10 @@ export const OrderList = props => (
     <Datagrid>
       <TextField label="Buyer" source="owner.firstName" />
 
-      <ArrayField label="Products" source="lineItems" reference="OrderLineItem">
+      <ArrayField label="Products" source="lineItems">
         <Datagrid>
 
-          <TextField label="Product" source="variant.product.name" />
+          <ProductLinkField label="Product" source="variant.product.name" />
 
           <NumberField
             label="Price"
