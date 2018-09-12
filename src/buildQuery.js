@@ -12,6 +12,8 @@ export const buildQueryFactory = (
   return (aorFetchType, resourceName, params, fragment) => {
     const resource = introspectionResults.resources.find(r => r.type.name === resourceName);
 
+    console.log('titi');
+
     if (!resource) {
       throw new Error(
         `Unknown resource ${resourceName}. Make sure it has been declared on your server side schema. Known resources are ${knownResources.join(
