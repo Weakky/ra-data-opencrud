@@ -68,8 +68,12 @@ export const AttributeShow = props => (
     <SimpleShowLayout>
       <TextField source="id" />
       <TextField source="value" />
-      <TextField label="Category" source="category.name" />
-      <TextField label= "Shop" source="shop.name" />
+      <ReferenceField label="Category" source="category.id" reference="Category">
+        <TextField source="name"/>
+      </ReferenceField>
+      <ReferenceField label="Shop" source="shop.id" reference="Shop">
+        <TextField source="name"/>
+      </ReferenceField>
     </SimpleShowLayout>
   </Show>
 );
