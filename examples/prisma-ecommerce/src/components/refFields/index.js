@@ -12,7 +12,7 @@ import {
  */
 
 // Take a source, and replace the last field by 'id'
-// eg: variant.product.name => variant.product.id
+// eg: getIdPath('variant.product.name') => variant.product.id
 const getIdPath = (source) => {
   const splitSource = source.split('.');
 
@@ -29,7 +29,7 @@ export const ProductLinkField = ({ source, record }) => (
   <Link to={`Product/${get(record, getIdPath(source))}`}>{get(record, source)}</Link>
 );
 
-export const BrandLinkField = ({ source, record }) => (console.log(getIdPath(source)) ||
+export const BrandLinkField = ({ source, record }) => (
   <Link to={`Brand/${get(record, getIdPath(source))}`}>{get(record, source)}</Link>
 );
 
@@ -38,5 +38,5 @@ export const ShopLinkField = ({ source, record }) => (
 );
 
 export const CategoryLinkField = ({ source, record }) => (
-  <Link to={`Shop/${record.category.id}`}>{get(record, source)}</Link>
+  <Link to={`Category/${get(record, getIdPath(source))}`}>{get(record, source)}</Link>
 );

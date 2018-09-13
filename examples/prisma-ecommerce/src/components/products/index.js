@@ -57,7 +57,7 @@ export const ProductList = props => (
       <TextField source="name" />
       <BrandLinkField label="Brand" source="brand.name" />
       <ArrayField label="Attributes" source="attributes">
-        <SingleFieldList>
+        <SingleFieldList linkType={false}>
           <ChipField source="value" />
         </SingleFieldList>
       </ArrayField>
