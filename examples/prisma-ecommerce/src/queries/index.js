@@ -50,7 +50,6 @@ export default {
             selectedOptions {
               id
               value {
-                id
                 name
               }
             }
@@ -109,7 +108,6 @@ export default {
         id
         name
         values {
-          id
           name
         }
         shop {
