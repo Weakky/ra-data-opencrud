@@ -232,7 +232,7 @@ const buildCreateVariables = introspectionResults => (resource, aorFetchType, pa
 
       // If no fields in the object are valid, continue
       if (Object.keys(fieldsToConnect).length === 0) {
-        return acc;
+        return { ...acc, data: { ...acc.data, [key]: params.data[key] } };
       }
 
       // Else, connect the nodes
