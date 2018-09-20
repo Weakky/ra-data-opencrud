@@ -38,9 +38,39 @@ const defaultOptions = {
 
 //TODO: Prisma supports batching (UPDATE_MANY, DELETE_MANY)
 export default options => {
-  return buildDataProvider(merge({}, defaultOptions, options)).then(graphQLDataProvider => {
-    return (fetchType, resource, params) => {
-      return graphQLDataProvider(fetchType, resource, params);
-    };
-  });
+  return buildDataProvider(merge({}, defaultOptions, options)).then(
+    graphQLDataProvider => {
+      return (fetchType, resource, params) => {
+        // Temporary work-around until we make use of updateMany and deleteMany mutations
+        if (fetchType === DELETE_MANY) {
+          const { ids, ...otherParams } = params;
+          return Promise.all(
+            params.ids.map(id =>
+              graphQLDataProvider(DELETE, resource, {
+                id,
+                ...otherParams
+              })
+            )
+          ).then(results => {
+            return { data: results.map(({ data }) => data.id) };
+          });
+        }
+
+        if (fetchType === UPDATE_MANY) {
+          const { ids, ...otherParams } = params;
+          return Promise.all(
+            params.ids.map(id =>
+              graphQLDataProvider(UPDATE, resource, {
+                id,
+                ...otherParams
+              })
+            )
+          ).then(results => {
+            return { data: results.map(({ data }) => data.id) };
+          });
+        }
+        return graphQLDataProvider(fetchType, resource, params);
+      };
+    }
+  );
 };
