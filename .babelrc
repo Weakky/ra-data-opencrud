@@ -1,8 +1,11 @@
 {
-  "plugins": ["transform-es2015-destructuring", "transform-object-rest-spread"],
+  "plugins": ["transform-object-rest-spread"],
   "env": {
-    "test": {
-      "plugins": ["transform-es2015-modules-commonjs"]
+    "cjs": {
+      "presets": ["env"]
+    },
+    "esm": {
+      "presets": [["env", { "modules": false }]]
     }
   }
 }
