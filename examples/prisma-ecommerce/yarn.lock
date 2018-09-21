@@ -5915,8 +5915,8 @@ ra-data-graphql@^2.3.0:
     pluralize "~7.0.0"
 
 ra-data-opencrud@latest:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/ra-data-opencrud/-/ra-data-opencrud-0.0.3.tgz#c254f8cad3c09d37f58ebb4656a36f72ccf48128"
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/ra-data-opencrud/-/ra-data-opencrud-0.0.6.tgz#58e0a317163333f1f194dc4180edc6bc09caa406"
   dependencies:
     graphql-tag "^2.6.1"
     lodash "~4.17.5"
