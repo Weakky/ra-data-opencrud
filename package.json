@@ -1,6 +1,6 @@
 {
   "name": "ra-data-opencrud",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A Prisma/GraphCMS data provider for react-admin",
   "main": "lib/index.js",
   "module": "esm/index.js",
