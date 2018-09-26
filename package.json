@@ -2,8 +2,7 @@
   "name": "ra-data-opencrud",
   "version": "0.0.6",
   "description": "A Prisma/GraphCMS data provider for react-admin",
-  "main": "lib/index.js",
-  "module": "esm/index.js",
+  "main": "dist/index.js",
   "sideEffects": false,
   "repository": {
     "type": "git",
