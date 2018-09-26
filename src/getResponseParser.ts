@@ -1,14 +1,20 @@
-import { TypeKind } from 'graphql';
+import { TypeKind, IntrospectionObjectType } from 'graphql';
 import { GET_LIST, GET_MANY, GET_MANY_REFERENCE } from 'react-admin';
 import getFinalType from './utils/getFinalType';
+import { IntrospectionResult, Resource } from './constants/interfaces';
 
-const sanitizeResource = (introspectionResults, resource) => data => {
+const sanitizeResource = (
+  introspectionResults: IntrospectionResult,
+  resource: Resource
+) => (data: { [key: string]: any }): any => {
   return Object.keys(data).reduce((acc, key) => {
     if (key.startsWith('_')) {
       return acc;
     }
 
-    const field = resource.type.fields.find(f => f.name === key);
+    const field = (resource.type as IntrospectionObjectType).fields.find(
+      f => f.name === key
+    )!;
     const type = getFinalType(field.type);
 
     if (type.kind !== TypeKind.OBJECT) {
@@ -16,7 +22,9 @@ const sanitizeResource = (introspectionResults, resource) => data => {
     }
 
     // FIXME: We might have to handle linked types which are not resources but will have to be careful about endless circular dependencies
-    const linkedResource = introspectionResults.resources.find(r => r.type.name === type.name);
+    const linkedResource = introspectionResults.resources.find(
+      r => r.type.name === type.name
+    );
 
     if (linkedResource) {
       const linkedResourceData = data[field.name];
@@ -27,15 +35,21 @@ const sanitizeResource = (introspectionResults, resource) => data => {
           [field.name]: data[field.name].map(
             sanitizeResource(introspectionResults, linkedResource)
           ),
-          [`${field.name}Ids`]: data[field.name].map(d => d.id)
+          [`${field.name}Ids`]: data[field.name].map(
+            (d: { id: string }) => d.id
+          )
         };
       }
 
       return {
         ...acc,
-        [`${field.name}.id`]: linkedResourceData ? data[field.name].id : undefined,
+        [`${field.name}.id`]: linkedResourceData
+          ? data[field.name].id
+          : undefined,
         [field.name]: linkedResourceData
-          ? sanitizeResource(introspectionResults, linkedResource)(data[field.name])
+          ? sanitizeResource(introspectionResults, linkedResource)(
+              data[field.name]
+            )
           : undefined
       };
     }
@@ -44,7 +58,10 @@ const sanitizeResource = (introspectionResults, resource) => data => {
   }, {});
 };
 
-export default introspectionResults => (aorFetchType, resource) => response => {
+export default (introspectionResults: IntrospectionResult) => (
+  aorFetchType: string,
+  resource: Resource
+) => (response: { [key: string]: any }) => {
   const sanitize = sanitizeResource(introspectionResults, resource);
   const data = response.data;
 

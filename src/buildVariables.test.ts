@@ -8,6 +8,7 @@ import {
 } from 'react-admin';
 import buildVariables from './buildVariables';
 import { TypeKind } from 'graphql/type/introspection';
+import { IntrospectionResult, Resource } from './constants/interfaces';
 
 describe('buildVariables', () => {
   describe('GET_LIST', () => {
@@ -15,8 +16,9 @@ describe('buildVariables', () => {
       const introspectionResult = {
         types: [
           {
+            kind: 'INPUT_OBJECT',
             name: 'PostWhereInput',
-            inputFields: [{ name: 'tags_some' }]
+            inputFields: [{ name: 'tags_some', type: { kind: '', name: '' } }]
           }
         ]
       };
@@ -32,11 +34,10 @@ describe('buildVariables', () => {
       };
 
       expect(
-        buildVariables(introspectionResult)(
-          { type: { name: 'Post' } },
+        buildVariables(introspectionResult as IntrospectionResult)(
+          { type: { name: 'Post' } } as Resource,
           GET_LIST,
-          params,
-          {}
+          params
         )
       ).toEqual({
         where: {
@@ -147,7 +148,7 @@ describe('buildVariables', () => {
                 }
               }
             ]
-          },
+          }
         ]
       };
 
@@ -161,8 +162,8 @@ describe('buildVariables', () => {
       };
 
       expect(
-        buildVariables(introspectionResult)(
-          { type: { name: 'Post' } },
+        buildVariables(introspectionResult as IntrospectionResult)(
+          { type: { name: 'Post' } } as Resource,
           CREATE,
           params
         )
@@ -288,8 +289,8 @@ describe('buildVariables', () => {
       };
 
       expect(
-        buildVariables(introspectionResult)(
-          { type: { name: 'Post' } },
+        buildVariables(introspectionResult as IntrospectionResult)(
+          { type: { name: 'Post' } } as Resource,
           UPDATE,
           params
         )
@@ -314,7 +315,11 @@ describe('buildVariables', () => {
       };
 
       expect(
-        buildVariables()({ type: { name: 'Post' } }, GET_MANY, params, {})
+        buildVariables({} as IntrospectionResult)(
+          { type: { name: 'Post' } } as Resource,
+          GET_MANY,
+          params
+        )
       ).toEqual({
         where: { id_in: ['tag1', 'tag2'] }
       });
@@ -329,11 +334,10 @@ describe('buildVariables', () => {
       };
 
       expect(
-        buildVariables()(
-          { type: { name: 'Post' } },
+        buildVariables({} as IntrospectionResult)(
+          { type: { name: 'Post' } } as Resource,
           GET_MANY_REFERENCE,
-          params,
-          {}
+          params
         )
       ).toEqual({
         where: { author: { id: 'author1' } }
@@ -348,11 +352,10 @@ describe('buildVariables', () => {
       };
 
       expect(
-        buildVariables()(
-          { type: { name: 'Post', inputFields: [] } },
+        buildVariables({} as IntrospectionResult)(
+          { type: { name: 'Post', inputFields: [] } } as any,
           DELETE,
-          params,
-          {}
+          params
         )
       ).toEqual({
         where: { id: 'post1' }
