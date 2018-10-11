@@ -160,7 +160,7 @@ export default introspectionResults => (
   variables,
   fragment
 ) => {
-  const { sortField, sortOrder, ...countVariables } = variables;
+  const { orderBy, skip, first, ...countVariables } = variables;
   const apolloArgs = buildApolloArgs(queryType, variables);
   const args = buildArgs(queryType, variables);
   const countArgs = buildArgs(queryType, countVariables);
