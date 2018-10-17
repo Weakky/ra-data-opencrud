@@ -1,61 +1,85 @@
-import { TypeKind, parse } from 'graphql';
+import {
+  TypeKind,
+  parse,
+  IntrospectionField,
+  DocumentNode,
+  IntrospectionType,
+  IntrospectionObjectType,
+  SelectionNode,
+  VariableDefinitionNode,
+  ArgumentNode,
+  FieldNode
+} from 'graphql';
 import { QUERY_TYPES } from 'ra-data-graphql';
 import { GET_LIST, GET_MANY, GET_MANY_REFERENCE, DELETE } from 'react-admin';
+import { IntrospectionResult, Resource } from './constants/interfaces';
 
 import * as gqlTypes from './utils/gqlTypes';
 import getFinalType from './utils/getFinalType';
 import isList from './utils/isList';
 import isRequired from './utils/isRequired';
 
-export const buildFields = introspectionResults => fields => {
-  return fields.reduce((acc, field) => {
-    const type = getFinalType(field.type);
+export interface Query {
+  name?: string;
+  args: IntrospectionField[];
+}
 
-    if (type.name.startsWith('_')) {
+export const buildFields = (introspectionResults: IntrospectionResult) => (
+  fields: IntrospectionField[]
+): FieldNode[] => {
+  return fields.reduce(
+    (acc: FieldNode[], field) => {
+      const type = getFinalType(field.type);
+
+      if (type.name.startsWith('_')) {
+        return acc;
+      }
+
+      if (type.kind !== TypeKind.OBJECT) {
+        return [...acc, gqlTypes.field(gqlTypes.name(field.name))];
+      }
+
+      const linkedResource = introspectionResults.resources.find(
+        r => r.type.name === type.name
+      );
+
+      if (linkedResource) {
+        return [
+          ...acc,
+          gqlTypes.field(gqlTypes.name(field.name), {
+            selectionSet: gqlTypes.selectionSet([
+              gqlTypes.field(gqlTypes.name('id'))
+            ])
+          })
+        ];
+      }
+
+      const linkedType = introspectionResults.types.find(
+        t => t.name === type.name
+      );
+
+      if (linkedType) {
+        return [
+          ...acc,
+          gqlTypes.field(gqlTypes.name(field.name), {
+            selectionSet: gqlTypes.selectionSet(
+              buildFields(introspectionResults)(
+                (linkedType as IntrospectionObjectType).fields
+              )
+            )
+          })
+        ];
+      }
+
+      // NOTE: We might have to handle linked types which are not resources but will have to be careful about
+      // ending with endless circular dependencies
       return acc;
-    }
-
-    if (type.kind !== TypeKind.OBJECT) {
-      return [...acc, gqlTypes.field(gqlTypes.name(field.name))];
-    }
-
-    const linkedResource = introspectionResults.resources.find(
-      r => r.type.name === type.name
-    );
-
-    if (linkedResource) {
-      return [
-        ...acc,
-        gqlTypes.field(gqlTypes.name(field.name), {
-          selectionSet: gqlTypes.selectionSet([
-            gqlTypes.field(gqlTypes.name('id'))
-          ])
-        })
-      ];
-    }
-
-    const linkedType = introspectionResults.types.find(
-      t => t.name === type.name
-    );
-
-    if (linkedType) {
-      return [
-        ...acc,
-        gqlTypes.field(gqlTypes.name(field.name), {
-          selectionSet: gqlTypes.selectionSet(
-            buildFields(introspectionResults)(linkedType.fields)
-          )
-        })
-      ];
-    }
-
-    // NOTE: We might have to handle linked types which are not resources but will have to be careful about
-    // ending with endless circular dependencies
-    return acc;
-  }, []);
+    },
+    [] as FieldNode[]
+  );
 };
 
-export const getArgType = arg => {
+export const getArgType = (arg: IntrospectionField) => {
   const type = getFinalType(arg.type);
   const required = isRequired(arg.type);
   const list = isList(arg.type);
@@ -63,24 +87,23 @@ export const getArgType = arg => {
   if (list) {
     if (required) {
       return gqlTypes.listType(
-        gqlTypes.nonNullType(
-          gqlTypes.namedType(gqlTypes.name(type.name))
-        )
+        gqlTypes.nonNullType(gqlTypes.namedType(gqlTypes.name(type.name)))
       );
     }
     return gqlTypes.listType(gqlTypes.namedType(gqlTypes.name(type.name)));
   }
 
   if (required) {
-    return gqlTypes.nonNullType(
-      gqlTypes.namedType(gqlTypes.name(type.name))
-    );
+    return gqlTypes.nonNullType(gqlTypes.namedType(gqlTypes.name(type.name)));
   }
 
   return gqlTypes.namedType(gqlTypes.name(type.name));
 };
 
-export const buildArgs = (query, variables) => {
+export const buildArgs = (
+  query: Query,
+  variables: { [key: string]: any } = {}
+) => {
   if (query.args.length === 0) {
     return [];
   }
@@ -91,18 +114,21 @@ export const buildArgs = (query, variables) => {
   return query.args
     .filter(arg => validVariables.includes(arg.name))
     .reduce(
-      (acc, arg) => [
+      (acc: ArgumentNode[], arg) => [
         ...acc,
         gqlTypes.argument(
           gqlTypes.name(arg.name),
           gqlTypes.variable(gqlTypes.name(arg.name))
         )
       ],
-      []
+      [] as ArgumentNode[]
     );
 };
 
-export const buildApolloArgs = (query, variables) => {
+export const buildApolloArgs = (
+  query: Query,
+  variables: { [key: string]: any } = {}
+) => {
   if (query.args.length === 0) {
     return [];
   }
@@ -113,17 +139,24 @@ export const buildApolloArgs = (query, variables) => {
 
   return query.args
     .filter(arg => validVariables.includes(arg.name))
-    .reduce((acc, arg) => [
-      ...acc,
-      gqlTypes.variableDefinition(
-        gqlTypes.variable(gqlTypes.name(arg.name)),
-        getArgType(arg)
-      )
-    ], []);
+    .reduce(
+      (acc: VariableDefinitionNode[], arg) => [
+        ...acc,
+        gqlTypes.variableDefinition(
+          gqlTypes.variable(gqlTypes.name(arg.name)),
+          getArgType(arg)
+        )
+      ],
+      [] as VariableDefinitionNode[]
+    );
 };
 
 //TODO: validate fragment against the schema
-const buildFieldsFromFragment = (fragment, resourceName, fetchType) => {
+const buildFieldsFromFragment = (
+  fragment: DocumentNode | string,
+  resourceName: string,
+  fetchType: string
+): SelectionNode[] => {
   let parsedFragment = {};
 
   if (
@@ -150,15 +183,15 @@ const buildFieldsFromFragment = (fragment, resourceName, fetchType) => {
     }
   }
 
-  return parsedFragment.definitions[0].selectionSet.selections;
+  return (parsedFragment as any).definitions[0].selectionSet.selections;
 };
 
-export default introspectionResults => (
-  resource,
-  aorFetchType,
-  queryType,
-  variables,
-  fragment
+export default (introspectionResults: IntrospectionResult) => (
+  resource: Resource,
+  aorFetchType: string,
+  queryType: Query,
+  variables: { [key: string]: any },
+  fragment: DocumentNode
 ) => {
   const { sortField, sortOrder, ...countVariables } = variables;
   const apolloArgs = buildApolloArgs(queryType, variables);
@@ -166,7 +199,9 @@ export default introspectionResults => (
   const countArgs = buildArgs(queryType, countVariables);
   const fields = !!fragment
     ? buildFieldsFromFragment(fragment, resource.type.name, aorFetchType)
-    : buildFields(introspectionResults)(resource.type.fields);
+    : buildFields(introspectionResults)(
+        (resource.type as IntrospectionObjectType).fields
+      );
 
   if (
     aorFetchType === GET_LIST ||
@@ -177,7 +212,7 @@ export default introspectionResults => (
       gqlTypes.operationDefinition(
         'query',
         gqlTypes.selectionSet([
-          gqlTypes.field(gqlTypes.name(queryType.name), {
+          gqlTypes.field(gqlTypes.name(queryType.name!), {
             alias: gqlTypes.name('items'),
             arguments: args,
             selectionSet: gqlTypes.selectionSet(fields)
@@ -187,12 +222,14 @@ export default introspectionResults => (
             arguments: countArgs,
             selectionSet: gqlTypes.selectionSet([
               gqlTypes.field(gqlTypes.name('aggregate'), {
-                selectionSet: gqlTypes.selectionSet([gqlTypes.field(gqlTypes.name('count'))])
+                selectionSet: gqlTypes.selectionSet([
+                  gqlTypes.field(gqlTypes.name('count'))
+                ])
               })
             ])
           })
         ]),
-        gqlTypes.name(queryType.name),
+        gqlTypes.name(queryType.name!),
         apolloArgs
       )
     ]);
@@ -203,7 +240,7 @@ export default introspectionResults => (
       gqlTypes.operationDefinition(
         'mutation',
         gqlTypes.selectionSet([
-          gqlTypes.field(gqlTypes.name(queryType.name), {
+          gqlTypes.field(gqlTypes.name(queryType.name!), {
             alias: gqlTypes.name('data'),
             arguments: args,
             selectionSet: gqlTypes.selectionSet([
@@ -211,7 +248,7 @@ export default introspectionResults => (
             ])
           })
         ]),
-        gqlTypes.name(queryType.name),
+        gqlTypes.name(queryType.name!),
         apolloArgs
       )
     ]);
@@ -221,13 +258,13 @@ export default introspectionResults => (
     gqlTypes.operationDefinition(
       QUERY_TYPES.includes(aorFetchType) ? 'query' : 'mutation',
       gqlTypes.selectionSet([
-        gqlTypes.field(gqlTypes.name(queryType.name), {
+        gqlTypes.field(gqlTypes.name(queryType.name!), {
           alias: gqlTypes.name('data'),
           arguments: args,
           selectionSet: gqlTypes.selectionSet(fields)
-        }),
+        })
       ]),
-      gqlTypes.name(queryType.name),
+      gqlTypes.name(queryType.name!),
       apolloArgs
     )
   ]);
