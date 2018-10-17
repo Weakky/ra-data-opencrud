@@ -193,7 +193,7 @@ export default (introspectionResults: IntrospectionResult) => (
   variables: { [key: string]: any },
   fragment: DocumentNode
 ) => {
-  const { sortField, sortOrder, ...countVariables } = variables;
+  const { orderBy, skip, first, ...countVariables } = variables;
   const apolloArgs = buildApolloArgs(queryType, variables);
   const args = buildArgs(queryType, variables);
   const countArgs = buildArgs(queryType, countVariables);
