@@ -226,27 +226,39 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
       }
 
       if (isObject(params.data[key])) {
-        const fieldsToUpdate = buildReferenceField({
-          inputArg: params.data[key],
+        const inputType = findInputFieldForType(
           introspectionResults,
-          typeName: `${resource.type.name}UpdateInput`,
-          field: key,
-          mutationType: PRISMA_CONNECT
-        });
+          `${resource.type.name}UpdateInput`,
+          key
+        );
 
-        // If no fields in the object are valid, continue
-        if (Object.keys(fieldsToUpdate).length === 0) {
+        if (!inputType) {
           return acc;
         }
 
-        // Else, connect the nodes
-        return {
-          ...acc,
-          data: {
-            ...acc.data,
-            [key]: { [PRISMA_CONNECT]: { ...fieldsToUpdate } }
+        if (inputType.kind !== 'SCALAR') {
+          const fieldsToUpdate = buildReferenceField({
+            inputArg: params.data[key],
+            introspectionResults,
+            typeName: `${resource.type.name}UpdateInput`,
+            field: key,
+            mutationType: PRISMA_CONNECT
+          });
+
+          // If no fields in the object are valid, continue
+          if (Object.keys(fieldsToUpdate).length === 0) {
+            return acc;
           }
-        };
+
+          // Else, connect the nodes
+          return {
+            ...acc,
+            data: {
+              ...acc.data,
+              [key]: { [PRISMA_CONNECT]: { ...fieldsToUpdate } }
+            }
+          };
+        }
       }
 
       // Put id field in a where object
@@ -316,27 +328,39 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
       }
 
       if (isObject(params.data[key])) {
-        const fieldsToConnect = buildReferenceField({
-          inputArg: params.data[key],
+        const inputType = findInputFieldForType(
           introspectionResults,
-          typeName: `${resource.type.name}CreateInput`,
-          field: key,
-          mutationType: PRISMA_CONNECT
-        });
+          `${resource.type.name}UpdateInput`,
+          key
+        );
 
-        // If no fields in the object are valid, continue
-        if (Object.keys(fieldsToConnect).length === 0) {
+        if (!inputType) {
           return acc;
         }
 
-        // Else, connect the nodes
-        return {
-          ...acc,
-          data: {
-            ...acc.data,
-            [key]: { [PRISMA_CONNECT]: { ...fieldsToConnect } }
+        if (inputType.kind !== 'SCALAR') {
+          const fieldsToConnect = buildReferenceField({
+            inputArg: params.data[key],
+            introspectionResults,
+            typeName: `${resource.type.name}CreateInput`,
+            field: key,
+            mutationType: PRISMA_CONNECT
+          });
+
+          // If no fields in the object are valid, continue
+          if (Object.keys(fieldsToConnect).length === 0) {
+            return acc;
           }
-        };
+
+          // Else, connect the nodes
+          return {
+            ...acc,
+            data: {
+              ...acc.data,
+              [key]: { [PRISMA_CONNECT]: { ...fieldsToConnect } }
+            }
+          };
+        }
       }
 
       // Put id field in a where object
