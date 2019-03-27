@@ -244,6 +244,18 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
             return acc;
           }
 
+          if (
+            Object.keys(fieldsToUpdate).every(k => fieldsToUpdate[k] === '')
+          ) {
+            return {
+              ...acc,
+              data: {
+                ...acc.data,
+                [key]: { [PRISMA_DISCONNECT]: true }
+              }
+            };
+          }
+
           // Else, connect the nodes
           return {
             ...acc,
