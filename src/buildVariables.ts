@@ -256,17 +256,26 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
 ) => {
   return Object.keys(params.data).reduce(
     (acc, key) => {
+      // Put id field in a where object
+      if (key === 'id' && params.data[key]) {
+        return {
+          ...acc,
+          where: {
+            id: params.data[key]
+          }
+        };
+      }
+      const inputType = findInputFieldForType(
+        introspectionResults,
+        `${resource.type.name}UpdateInput`,
+        key
+      );
+
+      if (!inputType) {
+        return acc;
+      }
+
       if (Array.isArray(params.data[key])) {
-        const inputType = findInputFieldForType(
-          introspectionResults,
-          `${resource.type.name}UpdateInput`,
-          key
-        );
-
-        if (!inputType) {
-          return acc;
-        }
-
         //TODO: Make connect, disconnect and update overridable
         //TODO: Make updates working
         const {
@@ -291,16 +300,6 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
       }
 
       if (isObject(params.data[key])) {
-        const inputType = findInputFieldForType(
-          introspectionResults,
-          `${resource.type.name}UpdateInput`,
-          key
-        );
-
-        if (!inputType) {
-          return acc;
-        }
-
         if (inputType.kind !== 'SCALAR') {
           const typeName = `${resource.type.name}UpdateInput`;
 
@@ -318,16 +317,6 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
             }
           };
         }
-      }
-
-      // Put id field in a where object
-      if (key === 'id' && params.data[key]) {
-        return {
-          ...acc,
-          where: {
-            id: params.data[key]
-          }
-        };
       }
 
       const type = introspectionResults.types.find(
@@ -362,17 +351,26 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
 ) =>
   Object.keys(params.data).reduce(
     (acc, key) => {
-      if (Array.isArray(params.data[key])) {
-        if (
-          !inputFieldExistsForType(
-            introspectionResults,
-            `${resource.type.name}CreateInput`,
-            key
-          )
-        ) {
-          return acc;
-        }
+      // Put id field in a where object
+      if (key === 'id' && params.data[key]) {
+        return {
+          ...acc,
+          where: {
+            id: params.data[key]
+          }
+        };
+      }
 
+      const inputType = findInputFieldForType(
+        introspectionResults,
+        `${resource.type.name}UpdateInput`,
+        key
+      );
+
+      if (!inputType) {
+        return acc;
+      }
+      if (Array.isArray(params.data[key])) {
         return {
           ...acc,
           data: {
@@ -413,16 +411,6 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
             }
           };
         }
-      }
-
-      // Put id field in a where object
-      if (key === 'id' && params.data[key]) {
-        return {
-          ...acc,
-          where: {
-            id: params.data[key]
-          }
-        };
       }
 
       const type = introspectionResults.types.find(
