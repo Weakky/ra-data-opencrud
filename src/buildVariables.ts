@@ -51,7 +51,7 @@ const buildGetListVariables = (introspectionResults: IntrospectionResult) => (
       if (!!inputField) {
         return {
           ...acc,
-          [key]: { id_in: params.filter[key] }
+          [key]: params.filter[key]
         };
       }
     }
@@ -130,7 +130,10 @@ const findInputFieldForType = (
     return null;
   }
 
-  const inputFieldType = type.inputFields.find(t => t.name === field);
+  //to search for the schema type of related ids
+  const fieldName = typeExistsForRelatedIds(field);
+
+  const inputFieldType = type.inputFields.find(t => t.name === fieldName);
 
   return !!inputFieldType ? getFinalType(inputFieldType.type) : null;
 };
@@ -141,6 +144,22 @@ const inputFieldExistsForType = (
   field: string
 ): boolean => {
   return !!findInputFieldForType(introspectionResults, typeName, field);
+};
+
+const typeExistsForRelatedIds = (key: string) => {
+  const idsStringIndex = key.indexOf('Ids');
+
+  return idsStringIndex !== -1 ? key.substr(0, idsStringIndex) : key;
+};
+
+const isJsonTypeField = (
+  fields: Array<object>,
+  key: string
+): boolean => {
+  const field = fields.find(t => t.name === key ? t : null);
+  const fieldType = field ? field.type.name || field.type.ofType.name : null;
+
+  return fieldType && fieldType === 'Json';
 };
 
 const buildReferenceField = ({
@@ -191,6 +210,22 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
 ) => {
   return Object.keys(params.data).reduce(
     (acc, key) => {
+      const type = introspectionResults.types.find(
+        t => t.name === resource.type.name
+      ) as IntrospectionObjectType;
+
+      //to work with JSON array
+      const isJsonField = isJsonTypeField(type.fields, key);
+      if(isJsonField) {
+        return {
+          ...acc,
+          data: {
+            ...acc.data,
+            [key]: params.data[key]
+          }
+        };
+      }
+
       if (Array.isArray(params.data[key])) {
         const inputType = findInputFieldForType(
           introspectionResults,
@@ -204,19 +239,23 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
 
         //TODO: Make connect, disconnect and update overridable
         //TODO: Make updates working
+
+        //to search for the schema type of related ids
+        const fieldName = typeExistsForRelatedIds(key);
+
         const {
           fieldsToAdd,
           fieldsToRemove /* fieldsToUpdate */
         } = computeFieldsToAddRemoveUpdate(
-          params.previousData[`${key}Ids`],
-          params.data[`${key}Ids`]
+          params.previousData[key],
+          params.data[key]
         );
 
         return {
           ...acc,
           data: {
             ...acc.data,
-            [key]: {
+            [fieldName]: {
               [PRISMA_CONNECT]: fieldsToAdd,
               [PRISMA_DISCONNECT]: fieldsToRemove
               //[PRISMA_UPDATE]: fieldsToUpdate
@@ -225,7 +264,7 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
         };
       }
 
-      if (isObject(params.data[key])) {
+      if (isObject(params.data[key]) && Object.prototype.toString.call(params.data[key]) !== '[object Date]') {
         const fieldsToUpdate = buildReferenceField({
           inputArg: params.data[key],
           introspectionResults,
@@ -259,9 +298,6 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
         };
       }
 
-      const type = introspectionResults.types.find(
-        t => t.name === resource.type.name
-      ) as IntrospectionObjectType;
       const isInField = type.fields.find(t => t.name === key);
 
       if (!!isInField) {
@@ -291,6 +327,22 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
 ) =>
   Object.keys(params.data).reduce(
     (acc, key) => {
+      const type = introspectionResults.types.find(
+        t => t.name === resource.type.name
+      ) as IntrospectionObjectType;
+
+      //to work with JSON array
+      const isJsonField = isJsonTypeField(type.fields, key);
+      if(isJsonField) {
+        return {
+          ...acc,
+          data: {
+            ...acc.data,
+            [key]: params.data[key]
+          }
+        };
+      }
+
       if (Array.isArray(params.data[key])) {
         if (
           !inputFieldExistsForType(
@@ -302,11 +354,14 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
           return acc;
         }
 
+        //to search for the schema type of related ids
+        const fieldName = typeExistsForRelatedIds(key);
+
         return {
           ...acc,
           data: {
             ...acc.data,
-            [key]: {
+              [fieldName]: {
               [PRISMA_CONNECT]: params.data[`${key}Ids`].map((id: string) => ({
                 id
               }))
@@ -315,7 +370,7 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
         };
       }
 
-      if (isObject(params.data[key])) {
+      if (isObject(params.data[key]) && Object.prototype.toString.call(params.data[key]) !== '[object Date]') {
         const fieldsToConnect = buildReferenceField({
           inputArg: params.data[key],
           introspectionResults,
@@ -349,9 +404,6 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
         };
       }
 
-      const type = introspectionResults.types.find(
-        t => t.name === resource.type.name
-      ) as IntrospectionObjectType;
       const isInField = type.fields.find(t => t.name === key);
 
       if (isInField) {

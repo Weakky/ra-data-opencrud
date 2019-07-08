@@ -43,7 +43,7 @@ It is then the job of the *prisma adaptator* to build the GraphQL query that mat
 
 Once the query and the function is passed back to `ra-data-graphql`, the actual HTTP requests is sent (using ApolloClient) to your GraphQL API, then the response is parsed with the provided function and that parsed response is given to `ra-core`, the core of react-admin. *That's it.*
 
-`ra-core` => `ra-data-graphql` => `ra-data-opencrud` => `ra-data-graphql` => `ra-core`.
+`ra-core` => `ra-data-graphql` => `ra-data-prisma2` => `ra-data-graphql` => `ra-core`.
 
 ## 4. OpenCRUD you say ?
 

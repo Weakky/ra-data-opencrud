@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Admin, Resource, GET_LIST } from 'react-admin';
 import get from 'lodash/get';
 
-import buildPrismaProvider, { buildQuery } from 'ra-data-opencrud';
+import buildPrismaProvider, { buildQuery } from 'ra-data-prisma2';
 import overridenQueries from './queries/index';
 
 import { ProductEdit, ProductList } from './components/products/index';

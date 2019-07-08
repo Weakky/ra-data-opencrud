@@ -1,4 +1,4 @@
-# ra-data-opencrud
+# ra-data-prisma2
 
 *Prisma on steroids*: easily build backoffices with Prisma/GraphCMS plugged on `react-admin`!
 
@@ -11,14 +11,14 @@ Be aware that it might not be working because of that, or that performances may 
 
 # Summary
 
-- [What is react admin ? And what's that ?](#what-is-react-admin-?-and-what's-ra-data-opencrud-?)
+- [What is react admin ? And what's that ?](#what-is-react-admin-?-and-what's-ra-data-prisma2-?)
 - [Installation](#installation)
 - [Usage](#installation)
 - [Options](#options)
 - [Tips and workflow](#tips-and-workflow)
 - [Contributing](#contributing)
 
-## What is react admin ? And what's ra-data-opencrud ?
+## What is react admin ? And what's ra-data-prisma2 ?
 
 [Find out more about the benefits of using `react-admin` with Prisma here.](context.md) 
 
@@ -27,13 +27,13 @@ Be aware that it might not be working because of that, or that performances may 
 Install with:
 
 ```sh
-npm install --save graphql ra-data-opencrud
+npm install --save graphql ra-data-prisma2
 ```
 
 or
 
 ```sh
-yarn add graphql ra-data-opencrud
+yarn add graphql ra-data-prisma2
 ```
 
 ## Usage
@@ -43,7 +43,7 @@ This example assumes a `Post` type is defined in your datamodel.
 ```js
 // in App.js
 import React, { Component } from 'react';
-import buildOpenCrudProvider from 'ra-data-opencrud';
+import buildOpenCrudProvider from 'ra-data-prisma2';
 import { Admin, Resource, Delete } from 'react-admin';
 
 import { PostCreate, PostEdit, PostList } from './posts';
@@ -104,7 +104,7 @@ The default behavior might not be optimized especially when dealing with referen
 
 ```js
 // in src/dataProvider.js
-import buildOpenCrudProvider, { buildQuery } from 'ra-data-opencrud';
+import buildOpenCrudProvider, { buildQuery } from 'ra-data-prisma2';
 
 const enhanceBuildQuery = introspection => (fetchType, resource, params) => {
     const builtQuery = buildQuery(introspection)(fetchType, resource, params);
@@ -143,7 +143,7 @@ You can also override a query using the same API `graphql-binding` offers.
 
 ```js
 // in src/dataProvider.js
-import buildOpenCrudProvider, { buildQuery } from 'ra-data-opencrud';
+import buildOpenCrudProvider, { buildQuery } from 'ra-data-prisma2';
 
 const enhanceBuildQuery = introspection => (fetchType, resource, params) => {
     if (resource === 'Command' && fetchType === 'GET_ONE') {
@@ -226,16 +226,16 @@ As overriding all queries can be cumbersome, **this should be done progressively
 
 ## Contributing
 
-Use the example under `examples/prisma-ecommerce` as a playground for improving `ra-data-opencrud`.
+Use the example under `examples/prisma-ecommerce` as a playground for improving `ra-data-prisma2`.
 
-To easily enhance `ra-data-opencrud` and get the changes reflected on `examples/prisma-ecommerce`, do the following:
+To easily enhance `ra-data-prisma2` and get the changes reflected on `examples/prisma-ecommerce`, do the following:
 
-- `cd ra-data-opencrud`
+- `cd ra-data-prisma2`
 - `yarn link`
 - `cd examples/prisma-ecommerce`
-- `yarn link ra-data-opencrud`
+- `yarn link ra-data-prisma2`
 
-Once this is done, the `ra-data-opencrud` dependency will be replaced by the one on the repository.
+Once this is done, the `ra-data-prisma2` dependency will be replaced by the one on the repository.
 **One last thing, don't forget to transpile the library with babel by running the following command on the root folder**
 
 
