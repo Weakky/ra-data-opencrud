@@ -13,7 +13,7 @@ const sanitizeResource = (
     }
 
     const field = (resource.type as IntrospectionObjectType).fields.find(
-      f => f.name === key
+      (f: any) => f.name === key
     )!;
     const type = getFinalType(field.type);
 

@@ -46,7 +46,7 @@ const buildGetListVariables = (introspectionResults: IntrospectionResult) => (
       const type = introspectionResults.types.find(
         t => t.name === `${resource.type.name}WhereInput`
       ) as IntrospectionInputObjectType;
-      const inputField = type.inputFields.find(t => t.name === key);
+      const inputField = type.inputFields.find((t: any) => t.name === key);
 
       if (!!inputField) {
         return {
@@ -60,7 +60,7 @@ const buildGetListVariables = (introspectionResults: IntrospectionResult) => (
       const type = introspectionResults.types.find(
         t => t.name === `${resource.type.name}WhereInput`
       ) as IntrospectionInputObjectType;
-      const filterSome = type.inputFields.find(t => t.name === `${key}_some`);
+      const filterSome = type.inputFields.find((t: any) => t.name === `${key}_some`);
 
       if (filterSome) {
         const filter = Object.keys(params.filter[key]).reduce(
@@ -82,7 +82,7 @@ const buildGetListVariables = (introspectionResults: IntrospectionResult) => (
           t => t.name === `${resource.type.name}WhereInput`
         ) as IntrospectionInputObjectType;
         const filterSome = type.inputFields.find(
-          t => t.name === `${parts[0]}_some`
+          (t: any) => t.name === `${parts[0]}_some`
         );
 
         if (filterSome) {
@@ -96,7 +96,7 @@ const buildGetListVariables = (introspectionResults: IntrospectionResult) => (
       }
 
       const resourceField = (resource.type as IntrospectionObjectType).fields.find(
-        f => f.name === parts[0]
+        (f: any) => f.name === parts[0]
       )!;
       if ((resourceField.type as IntrospectionNamedTypeRef).name === 'Int') {
         return { ...acc, [key]: parseInt(params.filter[key]) };
@@ -133,7 +133,7 @@ const findInputFieldForType = (
   //to search for the schema type of related ids
   const fieldName = typeExistsForRelatedIds(field);
 
-  const inputFieldType = type.inputFields.find(t => t.name === fieldName);
+  const inputFieldType = type.inputFields.find((t: any) => t.name === fieldName);
 
   return !!inputFieldType ? getFinalType(inputFieldType.type) : null;
 };
@@ -156,8 +156,8 @@ const isJsonTypeField = (
   fields: Array<object>,
   key: string
 ): boolean => {
-  const field = fields.find(t => t.name === key ? t : null);
-  const fieldType = field ? field.type.name || field.type.ofType.name : null;
+  const field = fields.find((t: any) => t.name === key ? t : null);
+  const fieldType = field ? (<any>field).type.name || (<any>field).type.ofType.name : null;
 
   return fieldType && fieldType === 'Json';
 };
@@ -298,7 +298,7 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
         };
       }
 
-      const isInField = type.fields.find(t => t.name === key);
+      const isInField = type.fields.find((t: any) => t.name === key);
 
       if (!!isInField) {
         // Rest should be put in data object
@@ -404,7 +404,7 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
         };
       }
 
-      const isInField = type.fields.find(t => t.name === key);
+      const isInField = type.fields.find((t: any) => t.name === key);
 
       if (isInField) {
         // Rest should be put in data object
