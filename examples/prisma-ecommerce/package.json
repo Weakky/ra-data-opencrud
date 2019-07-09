@@ -9,7 +9,7 @@
     "lodash": "~4.17.5",
     "pluralize": "~7.0.0",
     "ra-data-graphql": "^2.3.0",
-    "ra-data-opencrud": "latest",
+    "ra-data-prisma2": "latest",
     "react": "^16.4.1",
     "react-admin": "^2.3.0",
     "react-dom": "^16.4.1",
