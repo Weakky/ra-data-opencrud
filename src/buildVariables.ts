@@ -204,16 +204,24 @@ const buildReferenceField = ({
   }, {});
 };
 
+const shouldDisconnect = (inputArg: { [key: string]: any }) => {
+  // if inputArg is something like {id: null} or {id: ""}, we need to disconnect
+  // TODO: find a better way how to handle this case
+  return !Object.keys(inputArg).some(key => Boolean(inputArg[key]));
+};
+
 const buildObjectMutationData = ({
   inputArg,
   introspectionResults,
   typeName,
-  key
+  key,
+  type
 }: {
   inputArg: { [key: string]: any };
   introspectionResults: IntrospectionResult;
   typeName: string;
   key: string;
+  type: 'create' | 'update';
 }) => {
   const hasConnect = hasMutationInputType(
     introspectionResults,
@@ -221,26 +229,38 @@ const buildObjectMutationData = ({
     key,
     PRISMA_CONNECT
   );
+  if (shouldDisconnect(inputArg)) {
+    if (type === 'update') {
+      return {
+        [key]: {
+          [PRISMA_DISCONNECT]: true
+        }
+      };
+    } else {
+      // on create, just ignore it. We can't disconnect on create
+      return {};
+    }
+  } else {
+    const mutationType = hasConnect ? PRISMA_CONNECT : PRISMA_CREATE;
 
-  const mutationType = hasConnect ? PRISMA_CONNECT : PRISMA_CREATE;
+    const fields = buildReferenceField({
+      inputArg,
+      introspectionResults,
+      typeName,
+      field: key,
+      mutationType
+    });
 
-  const fields = buildReferenceField({
-    inputArg,
-    introspectionResults,
-    typeName,
-    field: key,
-    mutationType
-  });
+    // If no fields in the object are valid, continue
+    if (Object.keys(fields).length === 0) {
+      return {};
+    }
 
-  // If no fields in the object are valid, continue
-  if (Object.keys(fields).length === 0) {
-    return {};
+    // Else, connect the nodes
+    return {
+      [key]: { [mutationType]: { ...fields } }
+    };
   }
-
-  // Else, connect the nodes
-  return {
-    [key]: { [mutationType]: { ...fields } }
-  };
 };
 
 interface UpdateParams {
@@ -307,7 +327,8 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
             inputArg: params.data[key],
             introspectionResults,
             typeName,
-            key
+            key,
+            type: 'update'
           });
           return {
             ...acc,
@@ -401,7 +422,8 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
             inputArg: params.data[key],
             introspectionResults,
             typeName,
-            key
+            key,
+            type: 'create'
           });
           return {
             ...acc,
