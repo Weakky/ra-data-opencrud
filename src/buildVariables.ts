@@ -15,7 +15,8 @@ import { computeFieldsToAddRemoveUpdate } from './utils/computeAddRemoveUpdate';
 import {
   PRISMA_CONNECT,
   PRISMA_DISCONNECT,
-  PRISMA_UPDATE
+  PRISMA_UPDATE,
+  PRISMA_CREATE
 } from './constants/mutations';
 import {
   IntrospectionInputObjectType,
@@ -143,6 +144,35 @@ const inputFieldExistsForType = (
   return !!findInputFieldForType(introspectionResults, typeName, field);
 };
 
+const findMutationInputType = (
+  introspectionResults: IntrospectionResult,
+  typeName: string,
+  field: string,
+  mutationType: string
+) => {
+  const inputType = findInputFieldForType(
+    introspectionResults,
+    typeName,
+    field
+  );
+  return findInputFieldForType(
+    introspectionResults,
+    inputType!.name,
+    mutationType
+  );
+};
+
+const hasMutationInputType = (
+  introspectionResults: IntrospectionResult,
+  typeName: string,
+  field: string,
+  mutationType: string
+) => {
+  return Boolean(
+    findMutationInputType(introspectionResults, typeName, field, mutationType)
+  );
+};
+
 const buildReferenceField = ({
   inputArg,
   introspectionResults,
@@ -156,14 +186,10 @@ const buildReferenceField = ({
   field: string;
   mutationType: string;
 }) => {
-  const inputType = findInputFieldForType(
+  const mutationInputType = findMutationInputType(
     introspectionResults,
     typeName,
-    field
-  );
-  const mutationInputType = findInputFieldForType(
-    introspectionResults,
-    inputType!.name,
+    field,
     mutationType
   );
 
@@ -176,6 +202,65 @@ const buildReferenceField = ({
       ? { ...acc, [key]: inputArg[key] }
       : acc;
   }, {});
+};
+
+const shouldDisconnect = (inputArg: { [key: string]: any }) => {
+  // if inputArg is something like {id: null} or {id: ""}, we need to disconnect
+  // TODO: find a better way how to handle this case
+  return !Object.keys(inputArg).some(key => Boolean(inputArg[key]));
+};
+
+const buildObjectMutationData = ({
+  inputArg,
+  introspectionResults,
+  typeName,
+  key,
+  type
+}: {
+  inputArg: { [key: string]: any };
+  introspectionResults: IntrospectionResult;
+  typeName: string;
+  key: string;
+  type: 'create' | 'update';
+}) => {
+  const hasConnect = hasMutationInputType(
+    introspectionResults,
+    typeName,
+    key,
+    PRISMA_CONNECT
+  );
+  if (shouldDisconnect(inputArg)) {
+    if (type === 'update') {
+      return {
+        [key]: {
+          [PRISMA_DISCONNECT]: true
+        }
+      };
+    } else {
+      // on create, just ignore it. We can't disconnect on create
+      return {};
+    }
+  } else {
+    const mutationType = hasConnect ? PRISMA_CONNECT : PRISMA_CREATE;
+
+    const fields = buildReferenceField({
+      inputArg,
+      introspectionResults,
+      typeName,
+      field: key,
+      mutationType
+    });
+
+    // If no fields in the object are valid, continue
+    if (Object.keys(fields).length === 0) {
+      return {};
+    }
+
+    // Else, connect the nodes
+    return {
+      [key]: { [mutationType]: { ...fields } }
+    };
+  }
 };
 
 interface UpdateParams {
@@ -191,17 +276,26 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
 ) => {
   return Object.keys(params.data).reduce(
     (acc, key) => {
+      // Put id field in a where object
+      if (key === 'id' && params.data[key]) {
+        return {
+          ...acc,
+          where: {
+            id: params.data[key]
+          }
+        };
+      }
+      const inputType = findInputFieldForType(
+        introspectionResults,
+        `${resource.type.name}UpdateInput`,
+        key
+      );
+
+      if (!inputType) {
+        return acc;
+      }
+
       if (Array.isArray(params.data[key])) {
-        const inputType = findInputFieldForType(
-          introspectionResults,
-          `${resource.type.name}UpdateInput`,
-          key
-        );
-
-        if (!inputType) {
-          return acc;
-        }
-
         //TODO: Make connect, disconnect and update overridable
         //TODO: Make updates working
         const {
@@ -226,37 +320,24 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
       }
 
       if (isObject(params.data[key])) {
-        const fieldsToUpdate = buildReferenceField({
-          inputArg: params.data[key],
-          introspectionResults,
-          typeName: `${resource.type.name}UpdateInput`,
-          field: key,
-          mutationType: PRISMA_CONNECT
-        });
+        if (inputType.kind !== 'SCALAR') {
+          const typeName = `${resource.type.name}UpdateInput`;
 
-        // If no fields in the object are valid, continue
-        if (Object.keys(fieldsToUpdate).length === 0) {
-          return acc;
+          const data = buildObjectMutationData({
+            inputArg: params.data[key],
+            introspectionResults,
+            typeName,
+            key,
+            type: 'update'
+          });
+          return {
+            ...acc,
+            data: {
+              ...acc.data,
+              ...data
+            }
+          };
         }
-
-        // Else, connect the nodes
-        return {
-          ...acc,
-          data: {
-            ...acc.data,
-            [key]: { [PRISMA_CONNECT]: { ...fieldsToUpdate } }
-          }
-        };
-      }
-
-      // Put id field in a where object
-      if (key === 'id' && params.data[key]) {
-        return {
-          ...acc,
-          where: {
-            id: params.data[key]
-          }
-        };
       }
 
       const type = introspectionResults.types.find(
@@ -291,17 +372,26 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
 ) =>
   Object.keys(params.data).reduce(
     (acc, key) => {
-      if (Array.isArray(params.data[key])) {
-        if (
-          !inputFieldExistsForType(
-            introspectionResults,
-            `${resource.type.name}CreateInput`,
-            key
-          )
-        ) {
-          return acc;
-        }
+      // Put id field in a where object
+      if (key === 'id' && params.data[key]) {
+        return {
+          ...acc,
+          where: {
+            id: params.data[key]
+          }
+        };
+      }
 
+      const inputType = findInputFieldForType(
+        introspectionResults,
+        `${resource.type.name}UpdateInput`,
+        key
+      );
+
+      if (!inputType) {
+        return acc;
+      }
+      if (Array.isArray(params.data[key])) {
         return {
           ...acc,
           data: {
@@ -316,37 +406,33 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
       }
 
       if (isObject(params.data[key])) {
-        const fieldsToConnect = buildReferenceField({
-          inputArg: params.data[key],
+        const inputType = findInputFieldForType(
           introspectionResults,
-          typeName: `${resource.type.name}CreateInput`,
-          field: key,
-          mutationType: PRISMA_CONNECT
-        });
+          `${resource.type.name}UpdateInput`,
+          key
+        );
 
-        // If no fields in the object are valid, continue
-        if (Object.keys(fieldsToConnect).length === 0) {
+        if (!inputType) {
           return acc;
         }
 
-        // Else, connect the nodes
-        return {
-          ...acc,
-          data: {
-            ...acc.data,
-            [key]: { [PRISMA_CONNECT]: { ...fieldsToConnect } }
-          }
-        };
-      }
-
-      // Put id field in a where object
-      if (key === 'id' && params.data[key]) {
-        return {
-          ...acc,
-          where: {
-            id: params.data[key]
-          }
-        };
+        if (inputType.kind !== 'SCALAR') {
+          const typeName = `${resource.type.name}CreateInput`;
+          const data = buildObjectMutationData({
+            inputArg: params.data[key],
+            introspectionResults,
+            typeName,
+            key,
+            type: 'create'
+          });
+          return {
+            ...acc,
+            data: {
+              ...acc.data,
+              ...data
+            }
+          };
+        }
       }
 
       const type = introspectionResults.types.find(
