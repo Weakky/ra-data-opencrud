@@ -408,7 +408,9 @@ const buildListMutationData = ({
         return Object.keys(item).reduce((acc, key) => {
           const value = item[key];
           const type = listItemType.inputFields.find(f => f.name === key);
-
+          if (!type) {
+            return acc;
+          }
           if (type?.type.kind === 'INPUT_OBJECT') {
             const createOneType = introspectionResults.types.find(
               f => f.name === (type.type as IntrospectionNamedTypeRef).name
