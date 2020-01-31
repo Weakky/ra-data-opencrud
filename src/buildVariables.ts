@@ -410,10 +410,28 @@ const buildListMutationData = ({
           const type = listItemType.inputFields.find(f => f.name === key);
 
           if (type?.type.kind === 'INPUT_OBJECT') {
+            const createOneType = introspectionResults.types.find(
+              f => f.name === (type.type as IntrospectionNamedTypeRef).name
+            ) as IntrospectionInputObjectType;
+            const createInputFieldName = (createOneType.inputFields.find(
+              f => f.name === 'create'
+            )?.type as IntrospectionNamedTypeRef).name;
+            const createInputType = introspectionResults.types.find(
+              t => t.name === createInputFieldName
+            ) as IntrospectionInputObjectType;
+
             return {
               ...acc,
               [key]: {
-                create: value
+                create: Object.keys(value).reduce((acc, key) => {
+                  if (createInputType.inputFields.some(f => f.name === key)) {
+                    return {
+                      ...acc,
+                      [key]: value[key]
+                    };
+                  }
+                  return acc;
+                }, {})
               }
             };
           } else {
