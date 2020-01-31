@@ -1,30 +1,27 @@
 import {
+  IntrospectionInputObjectType,
+  IntrospectionListTypeRef,
+  IntrospectionNamedTypeRef,
+  IntrospectionObjectType
+} from 'graphql';
+import isObject from 'lodash/isObject';
+import {
+  CREATE,
+  DELETE,
   GET_LIST,
-  GET_ONE,
   GET_MANY,
   GET_MANY_REFERENCE,
-  CREATE,
-  UPDATE,
-  DELETE
+  GET_ONE,
+  UPDATE
 } from 'react-admin';
-import isObject from 'lodash/isObject';
-
-import getFinalType from './utils/getFinalType';
-import { computeFieldsToAddRemoveUpdate } from './utils/computeAddRemoveUpdate';
-
+import { IntrospectionResult, Resource } from './constants/interfaces';
 import {
   PRISMA_CONNECT,
-  PRISMA_DISCONNECT,
-  PRISMA_UPDATE,
-  PRISMA_CREATE
+  PRISMA_CREATE,
+  PRISMA_DISCONNECT
 } from './constants/mutations';
-import {
-  IntrospectionInputObjectType,
-  IntrospectionObjectType,
-  IntrospectionType,
-  IntrospectionNamedTypeRef
-} from 'graphql';
-import { IntrospectionResult, Resource } from './constants/interfaces';
+import { computeFieldsToAddRemoveUpdate } from './utils/computeAddRemoveUpdate';
+import getFinalType from './utils/getFinalType';
 
 interface GetListParams {
   filter: { [key: string]: any };
@@ -274,92 +271,165 @@ const buildUpdateVariables = (introspectionResults: IntrospectionResult) => (
   aorFetchType: String,
   params: UpdateParams
 ) => {
-  return Object.keys(params.data).reduce(
-    (acc, key) => {
-      // Put id field in a where object
-      if (key === 'id' && params.data[key]) {
-        return {
-          ...acc,
-          where: {
-            id: params.data[key]
-          }
-        };
-      }
-      const inputType = findInputFieldForType(
-        introspectionResults,
-        `${resource.type.name}UpdateInput`,
-        key
-      );
-
-      if (!inputType) {
-        return acc;
-      }
-
-      if (Array.isArray(params.data[key])) {
-        //TODO: Make connect, disconnect and update overridable
-        //TODO: Make updates working
-        const {
-          fieldsToAdd,
-          fieldsToRemove /* fieldsToUpdate */
-        } = computeFieldsToAddRemoveUpdate(
-          params.previousData[`${key}Ids`],
-          params.data[`${key}Ids`]
-        );
-
-        return {
-          ...acc,
-          data: {
-            ...acc.data,
-            [key]: {
-              [PRISMA_CONNECT]: fieldsToAdd,
-              [PRISMA_DISCONNECT]: fieldsToRemove
-              //[PRISMA_UPDATE]: fieldsToUpdate
-            }
-          }
-        };
-      }
-
-      if (isObject(params.data[key])) {
-        if (inputType.kind !== 'SCALAR') {
-          const typeName = `${resource.type.name}UpdateInput`;
-
-          const data = buildObjectMutationData({
-            inputArg: params.data[key],
-            introspectionResults,
-            typeName,
-            key,
-            type: 'update'
-          });
-          return {
-            ...acc,
-            data: {
-              ...acc.data,
-              ...data
-            }
-          };
+  return Object.keys(params.data).reduce((acc, key) => {
+    // Put id field in a where object
+    if (key === 'id' && params.data[key]) {
+      return {
+        ...acc,
+        where: {
+          id: params.data[key]
         }
-      }
+      };
+    }
+    const inputType = findInputFieldForType(
+      introspectionResults,
+      `${resource.type.name}UpdateInput`,
+      key
+    );
 
-      const type = introspectionResults.types.find(
-        t => t.name === resource.type.name
-      ) as IntrospectionObjectType;
-      const isInField = type.fields.find(t => t.name === key);
+    if (!inputType) {
+      return acc;
+    }
 
-      if (!!isInField) {
-        // Rest should be put in data object
+    if (Array.isArray(params.data[key])) {
+      return {
+        ...acc,
+        data: {
+          ...acc.data,
+          [key]: {
+            ...buildListMutationData({
+              key,
+              previousData: params.previousData,
+              data: params.data,
+              introspectionResults,
+              inputType
+            })
+          }
+        }
+      };
+    }
+
+    if (isObject(params.data[key])) {
+      if (inputType.kind !== 'SCALAR') {
+        const typeName = `${resource.type.name}UpdateInput`;
+
+        const data = buildObjectMutationData({
+          inputArg: params.data[key],
+          introspectionResults,
+          typeName,
+          key,
+          type: 'update'
+        });
         return {
           ...acc,
           data: {
             ...acc.data,
-            [key]: params.data[key]
+            ...data
           }
         };
       }
+    }
 
-      return acc;
-    },
-    {} as { [key: string]: any }
+    const type = introspectionResults.types.find(
+      t => t.name === resource.type.name
+    ) as IntrospectionObjectType;
+    const isInField = type.fields.find(t => t.name === key);
+
+    if (!!isInField) {
+      // Rest should be put in data object
+      return {
+        ...acc,
+        data: {
+          ...acc.data,
+          [key]: params.data[key]
+        }
+      };
+    }
+
+    return acc;
+  }, {} as { [key: string]: any });
+};
+
+const buildListMutationData = ({
+  key,
+  data,
+  previousData,
+  introspectionResults,
+  inputType
+}: {
+  key: string;
+  data: { [key: string]: any };
+  previousData?: { [key: string]: any };
+  introspectionResults: IntrospectionResult;
+  inputType: IntrospectionNamedTypeRef;
+}) => {
+  // is it a reference field or an array of objects?
+  const rawinputType = introspectionResults.types.find(
+    t => t.name === inputType.name
   );
+  const isEmbeddedReference =
+    rawinputType &&
+    rawinputType.kind === 'INPUT_OBJECT' &&
+    rawinputType.inputFields.some(f => f.name === 'connect');
+
+  if (isEmbeddedReference) {
+    const {
+      fieldsToAdd,
+      fieldsToRemove /* fieldsToUpdate */
+    } = computeFieldsToAddRemoveUpdate(
+      previousData?.[`${key}Ids`] ?? [],
+      data[`${key}Ids`] ?? []
+    );
+    if (previousData) {
+      return {
+        [PRISMA_CONNECT]: fieldsToAdd,
+        [PRISMA_DISCONNECT]: fieldsToRemove
+      };
+    } else {
+      return {
+        [PRISMA_CONNECT]: fieldsToAdd
+      };
+    }
+  } else {
+    let listData = data[key];
+    // get listItem type
+    if (rawinputType?.kind === 'INPUT_OBJECT') {
+      const createInputType = rawinputType.inputFields.find(
+        f => f.name === 'create'
+      );
+      const listType = (createInputType?.type as IntrospectionListTypeRef)
+        .ofType as IntrospectionListTypeRef;
+      const listItemTypeName = (listType.ofType as IntrospectionNamedTypeRef)
+        .name;
+      const listItemType = introspectionResults.types.find(
+        t => t.name === listItemTypeName
+      ) as IntrospectionInputObjectType;
+      listData = listData.map((item: { [x: string]: any }) => {
+        return Object.keys(item).reduce((acc, key) => {
+          const value = item[key];
+          const type = listItemType.inputFields.find(f => f.name === key);
+
+          if (type?.type.kind === 'INPUT_OBJECT') {
+            return {
+              ...acc,
+              [key]: {
+                create: value
+              }
+            };
+          } else {
+            return {
+              ...acc,
+              [key]: value
+            };
+          }
+        }, {});
+      });
+    }
+
+    return {
+      [PRISMA_CREATE]: listData
+    };
+  }
 };
 
 interface CreateParams {
@@ -370,91 +440,83 @@ const buildCreateVariables = (introspectionResults: IntrospectionResult) => (
   aorFetchType: string,
   params: CreateParams
 ) =>
-  Object.keys(params.data).reduce(
-    (acc, key) => {
-      // Put id field in a where object
-      if (key === 'id' && params.data[key]) {
-        return {
-          ...acc,
-          where: {
-            id: params.data[key]
+  Object.keys(params.data).reduce((acc, key) => {
+    // Put id field in a where object
+    if (key === 'id' && params.data[key]) {
+      return {
+        ...acc,
+        where: {
+          id: params.data[key]
+        }
+      };
+    }
+
+    const inputType = findInputFieldForType(
+      introspectionResults,
+      `${resource.type.name}CreateInput`,
+      key
+    );
+    if (!inputType) {
+      return acc;
+    }
+    if (Array.isArray(params.data[key])) {
+      return {
+        ...acc,
+        data: {
+          ...acc.data,
+          [key]: {
+            ...buildListMutationData({
+              key,
+              data: params.data,
+              introspectionResults,
+              inputType
+            })
           }
-        };
-      }
+        }
+      };
+    }
 
-      const inputType = findInputFieldForType(
-        introspectionResults,
-        `${resource.type.name}UpdateInput`,
-        key
-      );
-
+    if (isObject(params.data[key])) {
       if (!inputType) {
         return acc;
       }
-      if (Array.isArray(params.data[key])) {
-        return {
-          ...acc,
-          data: {
-            ...acc.data,
-            [key]: {
-              [PRISMA_CONNECT]: params.data[`${key}Ids`].map((id: string) => ({
-                id
-              }))
-            }
-          }
-        };
-      }
 
-      if (isObject(params.data[key])) {
-        const inputType = findInputFieldForType(
+      if (inputType.kind !== 'SCALAR') {
+        const typeName = `${resource.type.name}CreateInput`;
+        const data = buildObjectMutationData({
+          inputArg: params.data[key],
           introspectionResults,
-          `${resource.type.name}UpdateInput`,
-          key
-        );
-
-        if (!inputType) {
-          return acc;
-        }
-
-        if (inputType.kind !== 'SCALAR') {
-          const typeName = `${resource.type.name}CreateInput`;
-          const data = buildObjectMutationData({
-            inputArg: params.data[key],
-            introspectionResults,
-            typeName,
-            key,
-            type: 'create'
-          });
-          return {
-            ...acc,
-            data: {
-              ...acc.data,
-              ...data
-            }
-          };
-        }
-      }
-
-      const type = introspectionResults.types.find(
-        t => t.name === resource.type.name
-      ) as IntrospectionObjectType;
-      const isInField = type.fields.find(t => t.name === key);
-
-      if (isInField) {
-        // Rest should be put in data object
+          typeName,
+          key,
+          type: 'create'
+        });
         return {
           ...acc,
           data: {
             ...acc.data,
-            [key]: params.data[key]
+            ...data
           }
         };
       }
+    }
+    const type = introspectionResults.types.find(
+      t => t.name === resource.type.name
+    ) as IntrospectionObjectType;
+    const isInField = type.fields.find(t => t.name === key);
 
-      return acc;
-    },
-    {} as { [key: string]: any }
-  );
+    if (isInField) {
+      // Rest should be put in data object
+      return {
+        ...acc,
+        data: {
+          ...acc.data,
+          [key]: params.data[key]
+        }
+      };
+    }
+
+    return acc;
+  }, {} as { [key: string]: any });
 
 export default (introspectionResults: IntrospectionResult) => (
   resource: Resource,
