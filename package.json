@@ -28,7 +28,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "test": "jest"
   },
   "dependencies": {
     "graphql-tag": "^2.6.1",
@@ -51,8 +52,10 @@
     "cross-env": "^5.2.0",
     "graphql": "^0.13.2",
     "jest": "^23.6.0",
+    "react": "16.12.0",
+    "react-dom": "16.12.0",
     "react-admin": "^2.3.0",
     "rimraf": "^2.6.2",
-    "typescript": "^3.0.3"
+    "typescript": "^3.7.5"
   }
 }

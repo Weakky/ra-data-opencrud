@@ -1,13 +1,13 @@
+import { TypeKind } from 'graphql/type/introspection';
 import {
+  CREATE,
+  DELETE,
   GET_LIST,
   GET_MANY,
   GET_MANY_REFERENCE,
-  CREATE,
-  UPDATE,
-  DELETE
+  UPDATE
 } from 'react-admin';
 import buildVariables from './buildVariables';
-import { TypeKind } from 'graphql/type/introspection';
 import { IntrospectionResult, Resource } from './constants/interfaces';
 
 describe('buildVariables', () => {
@@ -65,10 +65,18 @@ describe('buildVariables', () => {
               }
             ]
           },
+
           {
             name: 'PostCreateInput',
             kind: TypeKind.INPUT_OBJECT,
             inputFields: [
+              {
+                name: 'title',
+                type: {
+                  kind: TypeKind.SCALAR,
+                  name: 'String'
+                }
+              },
               {
                 name: 'author',
                 type: {
@@ -192,6 +200,13 @@ describe('buildVariables', () => {
             kind: TypeKind.INPUT_OBJECT,
             inputFields: [
               {
+                name: 'title',
+                type: {
+                  kind: TypeKind.SCALAR,
+                  name: 'String'
+                }
+              },
+              {
                 name: 'author',
                 type: {
                   kind: TypeKind.NON_NULL,
@@ -303,6 +318,193 @@ describe('buildVariables', () => {
             disconnect: []
           },
           title: 'Foo'
+        }
+      });
+    });
+
+    it('should handle objects in lists correctly', () => {
+      // this is taken from a realworlds example
+      const introspectionResult = {
+        types: [
+          {
+            name: 'Post',
+            fields: [{ name: 'title' }]
+          },
+          {
+            name: 'PostUpdateInput',
+            kind: TypeKind.INPUT_OBJECT,
+            inputFields: [
+              {
+                name: 'title',
+                type: {
+                  kind: TypeKind.SCALAR,
+                  name: 'String'
+                }
+              },
+              {
+                name: 'imageGallery',
+
+                type: {
+                  kind: 'INPUT_OBJECT',
+                  name: 'ImageGalleryItemUpdateManyInput'
+                }
+              }
+            ]
+          },
+
+          {
+            kind: 'INPUT_OBJECT',
+            name: 'ImageGalleryItemUpdateManyInput',
+
+            inputFields: [
+              {
+                name: 'create',
+
+                type: {
+                  kind: 'LIST',
+
+                  ofType: {
+                    kind: 'NON_NULL',
+
+                    ofType: {
+                      kind: 'INPUT_OBJECT',
+                      name: 'ImageGalleryItemCreateInput'
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            kind: 'INPUT_OBJECT',
+            name: 'ImageGalleryItemCreateInput',
+
+            inputFields: [
+              {
+                name: 'caption',
+
+                type: {
+                  kind: 'SCALAR',
+                  name: 'String'
+                }
+              },
+              {
+                name: 'image',
+
+                type: {
+                  kind: 'INPUT_OBJECT',
+                  name: 'FileReferenceCreateOneInput'
+                }
+              }
+            ]
+          },
+          {
+            kind: 'INPUT_OBJECT',
+            name: 'FileReferenceCreateOneInput',
+
+            inputFields: [
+              {
+                name: 'create',
+
+                type: {
+                  kind: 'INPUT_OBJECT',
+                  name: 'FileReferenceCreateInput'
+                }
+              }
+            ]
+          },
+          {
+            kind: 'INPUT_OBJECT',
+            name: 'FileReferenceCreateInput',
+
+            inputFields: [
+              {
+                name: 'bucket',
+
+                type: {
+                  kind: 'NON_NULL',
+
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'String'
+                  }
+                }
+              },
+              {
+                name: 'fileId',
+
+                type: {
+                  kind: 'NON_NULL',
+
+                  ofType: {
+                    kind: 'SCALAR',
+                    name: 'String'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      const params = {
+        data: {
+          id: 'postId',
+          title: 'some title',
+          imageGallery: [
+            {
+              image: {
+                fileId: 'someFileId',
+                bucket: 'SomeBucket'
+              },
+              caption: 'some title'
+            },
+            {
+              image: {
+                fileId: 'someOtherId',
+                bucket: 'SomeBucket'
+              },
+              caption: 'some other title'
+            }
+          ]
+        },
+        previousData: {
+          id: 'postId',
+          imageGallery: []
+        }
+      };
+      expect(
+        buildVariables(introspectionResult as IntrospectionResult)(
+          { type: { name: 'Post' } } as Resource,
+          UPDATE,
+          params
+        )
+      ).toEqual({
+        where: { id: 'postId' },
+        data: {
+          imageGallery: {
+            create: [
+              {
+                image: {
+                  create: {
+                    fileId: 'someFileId',
+                    bucket: 'SomeBucket'
+                  }
+                },
+                caption: 'some title'
+              },
+              {
+                image: {
+                  create: {
+                    fileId: 'someOtherId',
+                    bucket: 'SomeBucket'
+                  }
+                },
+                caption: 'some other title'
+              }
+            ]
+          },
+          title: 'some title'
         }
       });
     });

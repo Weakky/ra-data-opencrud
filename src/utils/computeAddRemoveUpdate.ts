@@ -1,23 +1,36 @@
-import difference from 'lodash/difference';
+import differencWith from 'lodash/differencewith';
+import isEqual from 'lodash/isEqual';
+import isString from 'lodash/isString';
 
-type ID = string;
+type Entry = string | object;
 
-const formatId = (id: ID) => ({ id });
-
-export const computeFieldsToAdd = (oldIds: ID[], newIds: ID[]) => {
-  return difference(newIds, oldIds).map(formatId);
+const formatEntry = (id: Entry) => {
+  if (isString(id)) {
+    return { id };
+  } else {
+    return id;
+  }
 };
 
-export const computeFieldsToRemove = (oldIds: ID[], newIds: ID[]) => {
-  return difference(oldIds, newIds).map(formatId);
+const computeFieldsToAdd = (oldArray: Entry[], newArray: Entry[]) => {
+  return differencWith(newArray, oldArray, isEqual).map(formatEntry);
 };
 
-export const computeFieldsToUpdate = (oldIds: ID[], newIds: ID[]) => {
-  return oldIds.filter(oldId => newIds.includes(oldId)).map(formatId);
+const computeFieldsToRemove = (oldArray: Entry[], newArray: Entry[]) => {
+  return differencWith(oldArray, newArray, isEqual).map(formatEntry);
 };
 
-export const computeFieldsToAddRemoveUpdate = (oldIds: ID[], newIds: ID[]) => ({
-  fieldsToAdd: computeFieldsToAdd(oldIds, newIds),
-  fieldsToRemove: computeFieldsToRemove(oldIds, newIds),
-  fieldsToUpdate: computeFieldsToUpdate(oldIds, newIds)
+/*
+const computeFieldsToUpdate = (oldArray: Entry[], newArray: Entry[]) => {
+  return oldArray.filter(oldId => newArray.includes(oldId)).map(formatEntry);
+};
+*/
+
+export const computeFieldsToAddRemoveUpdate = (
+  oldArray: Entry[],
+  newArray: Entry[]
+) => ({
+  fieldsToAdd: computeFieldsToAdd(oldArray, newArray),
+  fieldsToRemove: computeFieldsToRemove(oldArray, newArray)
+  //fieldsToUpdate: computeFieldsToUpdate(oldArray, newArray)
 });
